@@ -10,6 +10,7 @@ I created this application to practice and play around with full-stack developme
 
 ### Server:
 `cd` into the `server` directory and run `npm run start`
+
 **Note:** You may need to seed the database. I committed the binary I've used for local dev, so it __should__ work out of the box, but if not, simply run the following commands:
 
 Install sqlite globally:
