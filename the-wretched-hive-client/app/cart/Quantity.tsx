@@ -49,10 +49,12 @@ export default function Quantity({ cartItem }: { cartItem: CartItem }) {
   };
 
   return (
-    <div className="flex flex-row w-12 justify-between">
-      <button disabled={isPending} onClick={handleDecrement}>-</button>
-      <p>{ quantity }</p>
-      <button disabled={isPending} onClick={handleIncrement}>+</button>
+    <div className="flex justify-center">
+      <div className="flex flex-row justify-between">
+        <button className="text-xl border-2 rounded-full px-4 border-gray-500" disabled={isPending} onClick={handleDecrement}>-</button>
+        <p className="text-xl mx-2">{ quantity }</p>
+        <button className="text-xl border-2 rounded-full px-4 border-gray-500" disabled={isPending} onClick={handleIncrement}>+</button>
+      </div>
     </div>
   )
 }

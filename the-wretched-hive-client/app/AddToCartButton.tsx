@@ -33,6 +33,12 @@ export default function AddToCartButton({ productId }: AddToCartButtonProps) {
   };
 
   return (
-    <button disabled={isPending} onClick={handleAddToCart}>Add to Cart</button>
+    <button
+      className="my-2 border-neutral-500 border-2 p-2 cursor-pointer"
+      disabled={isPending}
+      onClick={handleAddToCart}
+    >
+      Add to Cart
+    </button>
   )
 };

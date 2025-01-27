@@ -7,11 +7,20 @@ export default async function ProductsPage({ params }: { params: Promise<{ id: s
 
   return (
     <div>
-      <h1>{ product.name }</h1>
-      <p>{ product.category }</p>
-      <p>{ product.description }</p>
-      <p>{ product.price }</p>
-      <AddToCartButton productId={product.id} />
+      <div className="flex flex-row justify-between">
+        <div>
+          <h1 className="font-bold">{ product.name }</h1>
+          <h2 className="mb-4">{ product.category }</h2>
+        </div>
+        <p>${ product.price }</p>
+      </div>
+      <div className="flex flex-row">
+        <img src="https://placehold.co/256x256" alt="placeholder image" />
+        <div className="ml-4">
+          <p>{ product.description }</p>
+          <AddToCartButton productId={product.id} />
+        </div>
+      </div>
     </div>
   )
 }

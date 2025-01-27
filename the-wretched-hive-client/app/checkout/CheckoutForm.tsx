@@ -45,26 +45,31 @@ export default function CheckoutForm({ total }: CheckoutFormProps) {
 
   return (
     <form
-      className="flex flex-col max-w-screen-sm"
+      className="flex flex-col w-full"
       onSubmit={handleSubmit}
     >
-      <label className="flex flex-col">
+      <label className="flex flex-col mb-4">
         Name
         <input className="text-black" required type="text" name="name"></input>
       </label>
-      <label className="flex flex-col">
+      <label className="flex flex-col mb-4">
         Email
         <input className="text-black" required type="text" name="email"></input>
       </label>
-      <label className="flex flex-col">
+      <label className="flex flex-col mb-4">
         Address
         <input className="text-black" required type="text" name="address"></input>
       </label>
-      <label className="flex flex-col">
+      <label className="flex flex-col mb-4">
         Phone Number
         <input className="text-black" required type="text" name="phone"></input>
       </label>
-      <button type="submit">Pay</button>
+      <button 
+        className="mt-4 border-neutral-500 border-2 p-2 cursor-pointer"
+        type="submit"
+      >
+        Pay
+      </button>
     </form>
   )
 }

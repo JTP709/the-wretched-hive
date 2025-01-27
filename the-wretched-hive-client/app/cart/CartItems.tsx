@@ -1,3 +1,4 @@
+import Link from "next/link";
 import Quantity from "./Quantity";
 
 export default async function CartItems() {
@@ -6,12 +7,16 @@ export default async function CartItems() {
 
   return ( 
     <div>
-      {cart.map((cartItem: CartItem) => (
+      {cart.map((cartItem: CartItem, i: number) => (
         <div key={cartItem.id}>
-          <h1>{cartItem.name}</h1>
-          <p>{cartItem.description}</p>
-          <p>{cartItem.price}</p>
+          <div className="flex flex-row justify-between">
+            <Link href={`/products/${cartItem.productId}`}>
+              <h1 className="font-bold mb-2 mr-12">{cartItem.name}</h1>
+            </Link>
+            <p>${cartItem.price}</p>
+          </div>
           <Quantity cartItem={cartItem} />
+          { i !== cart.length - 1 && <hr className="my-4" /> }
         </div>
       ))}
     </div>

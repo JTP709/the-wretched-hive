@@ -17,11 +17,13 @@ export default async function Checkout() {
     });
 
   return (
-    <div>
-      <h1>Checkout</h1>
-      <p>Total: { total }</p>
+    <>
+      <div className="flex flex-row w-full justify-between">
+        <h1 className="font-bold text-xl mr-16">Checkout</h1>
+        <p className="font-bold text-xl">Total: ${ total }</p>
+      </div>
       <CheckoutForm total={total} />
-    </div>
+    </>
   )
 };
 

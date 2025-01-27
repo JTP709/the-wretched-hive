@@ -16,6 +16,10 @@
 
 -- CREATE TABLE orders (
 --     id INTEGER PRIMARY KEY AUTOINCREMENT,
+--     name TEXT NOT NULL,
+--     email TEXT NOT NULL,
+--     address TEXT NOT NULL,
+--     phont TEXT NOT NULL,
 --     total REAL NOT NULL
 -- );
 
