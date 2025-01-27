@@ -186,7 +186,6 @@ app.get('/api/checkout/total', (_, res) => {
 });
 
 app.post('/api/checkout', (req, res) => {
-  console.log(req.body)
   const { name, email, address, phone, total } = req.body;
   if (!name || !email || !address || !phone || !total) {
     res.status(400).json({ error: 'Missing required fields' });

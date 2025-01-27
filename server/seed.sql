@@ -19,7 +19,7 @@
 --     name TEXT NOT NULL,
 --     email TEXT NOT NULL,
 --     address TEXT NOT NULL,
---     phont TEXT NOT NULL,
+--     phone TEXT NOT NULL,
 --     total REAL NOT NULL
 -- );
 
