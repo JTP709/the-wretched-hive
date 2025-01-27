@@ -14,21 +14,6 @@ const connectToDatabase = (app) => {
     }
   });
 
-  const query = `
-    SELECT name 
-    FROM sqlite_master 
-    WHERE type='table' 
-    ORDER BY name;
-  `;
-
-  db.all(query, (err, rows) => {
-    if (err) console.error(err);
-    else rows.forEach((row) => {
-      console.log(row.name);
-    });
-    console.log({rows})
-  });
-
   process.on('exit', () => {
     db.close((err) => {
       if (err) {
