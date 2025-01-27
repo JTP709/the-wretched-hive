@@ -9,7 +9,7 @@
 
 -- CREATE TABLE cartItems (
 --     id INTEGER PRIMARY KEY AUTOINCREMENT,
---     productId INTEGER NOT NULL,
+--     productId INTEGER NOT NULL UNIQUE,
 --     quantity INTEGER NOT NULL,
 --     FOREIGN KEY (productId) REFERENCES products(id)
 -- );

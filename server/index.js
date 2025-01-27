@@ -69,7 +69,12 @@ app.get('/api/products/:id', (req, res) => {
  */
 
 app.get('/api/cart', (req, res) => {
-  db.all('SELECT * FROM cart', (err, rows) => {
+  db.all(`
+    SELECT c.id, productId, quantity, name, price, image, category, description 
+    FROM cartItems AS c 
+    LEFT JOIN products AS p
+    WHERE c.productId = p.id;
+  `, (err, rows) => {
     if (err) {
       console.error(err);
       res.status(500).json({ error: 'Internal server error' });
@@ -85,7 +90,12 @@ app.post('/api/cart', (req, res) => {
     res.status(400).json({ error: 'Missing required fields' });
     return;
   }
-  db.run('INSERT INTO cartItems (productId, quantity) VALUES (?, ?)', [productId, quantity], (err) => {
+  db.run(`
+    INSERT INTO cartItems (productId, quantity)
+    VALUES(?, ?)
+    ON CONFLICT(productId)
+    DO UPDATE SET quantity = quantity + excluded.quantity;
+  `, [productId, quantity], (err) => {
     if (err) {
       console.error(err);
       res.status(500).json({ error: 'Internal server error' });
@@ -107,19 +117,37 @@ app.delete('/api/cart/:id', (req, res) => {
 });
 
 app.put('/api/cart/:id', (req, res) => {
-  const { quantity, id } = req.body;
-  if (!quantity) {
+  const { quantity } = req.body;
+  const { id } = req.params;
+  console.log('>', {
+    quantity,
+    id,
+  })
+  if (quantity === undefined || quantity === null) {
+    console.log('>> NULLISH')
     res.status(400).json({ error: 'Missing required fields' });
-    return;
+  } else if (quantity <= 0) {
+    console.log('>> quantity is 0')
+    db.run('DELETE FROM cartItems WHERE id = ?', [id], (err) => {
+      if (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Internal server error' });
+      } else {
+        res.status(204).json({ id: req.params.id });
+      }
+    })
+  } else {
+    console.log('>> updating')
+    db.run('UPDATE cartItems SET quantity = ? WHERE id = ?;', [quantity, id], (err, rows) => {
+      console.log('>>>', { err, rows })
+      if (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Internal server error' });
+      } else {
+        res.json({ id: req.params.id, quantity });
+      }
+    });
   }
-  db.run('UPDATE cartItems SET quantity = ? WHERE id = ?', [quantity, id], (err) => {
-    if (err) {
-      console.error(err);
-      res.status(500).json({ error: 'Internal server error' });
-    } else {
-      res.json({ id: req.params.id, quantity });
-    }
-  });
 });
 
 /**

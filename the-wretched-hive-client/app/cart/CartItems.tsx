@@ -1,14 +1,17 @@
+import Quantity from "./Quantity";
+
 export default async function CartItems() {
-  const cart = await fetch('http://localhost:4000/api/cart')
-    .then(res => res.json());
+  const cartResponse = await fetch('http://localhost:4000/api/cart');
+  const cart: CartItem[] = await cartResponse.json();
 
   return ( 
     <div>
-      {cart.map((product: Product) => (
-        <div key={product.id}>
-          <h1>{product.name}</h1>
-          <p>{product.description}</p>
-          <p>{product.price}</p>
+      {cart.map((cartItem: CartItem) => (
+        <div key={cartItem.id}>
+          <h1>{cartItem.name}</h1>
+          <p>{cartItem.description}</p>
+          <p>{cartItem.price}</p>
+          <Quantity cartItem={cartItem} />
         </div>
       ))}
     </div>
