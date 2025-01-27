@@ -31,8 +31,7 @@ export default function CheckoutForm({ total }: CheckoutFormProps) {
       headers: new Headers({ 'content-type': 'application/json' }),
       body: JSON.stringify(formDataJSON),
     }).then((res) => {
-      if (res.status <= 400) {
-        console.log(res);
+      if (!res.ok) {
         alert('There was an issue while trying to complete your purchase.');
       } else {
         router.push(`/confirmation?total=${total}`);

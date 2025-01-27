@@ -15,7 +15,7 @@ export default function Quantity({ cartItem }: { cartItem: CartItem }) {
       headers: new Headers({ 'content-type': 'application/json' }),
       body: JSON.stringify({ quantity: quantity - 1 }),
     }).then((res) => {
-      if (res.status >= 400 ) {
+      if (!res.ok ) {
         console.log(res);
         alert('Update cart failed.');
       };
@@ -35,7 +35,7 @@ export default function Quantity({ cartItem }: { cartItem: CartItem }) {
       headers: new Headers({ 'content-type': 'application/json' }),
       body: JSON.stringify({ quantity: quantity + 1 }),
     }).then((res) => {
-      if (res.status >= 400 ) {
+      if (!res.ok ) {
         console.log(res);
         alert('Update cart failed.');
       };

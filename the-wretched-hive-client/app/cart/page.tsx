@@ -4,7 +4,7 @@ import CartItems from "./CartItems";
 export default async function Cart() {
   const total: string = await fetch('http://localhost:4000/api/checkout/total')
     .then(res => {
-      if (res.status >= 400) {
+      if (!res.ok) {
         console.log(res);
         alert('There was an issue fetching the cart total');
       } else {

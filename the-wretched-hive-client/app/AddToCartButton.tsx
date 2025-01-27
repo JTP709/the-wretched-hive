@@ -18,7 +18,7 @@ export default function AddToCartButton({ productId }: AddToCartButtonProps) {
         quantity: 1
       }),
     }).then((res) => {
-      if (res.status >= 400) {
+      if (!res.ok) {
         console.log(res)
         alert('Error adding product to cart')
       } else {
