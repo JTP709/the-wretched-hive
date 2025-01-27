@@ -80,23 +80,23 @@ app.get('/api/cart', (req, res) => {
 });
 
 app.post('/api/cart', (req, res) => {
-  const { product_id, quantity } = req.body;
-  if (!product_id || !quantity) {
+  const { productId, quantity } = req.body;
+  if (!productId || !quantity) {
     res.status(400).json({ error: 'Missing required fields' });
     return;
   }
-  db.exec('INSERT INTO cart (product_id, quantity) VALUES (?, ?)', [product_id, quantity], (err) => {
+  db.run('INSERT INTO cartItems (productId, quantity) VALUES (?, ?)', [productId, quantity], (err) => {
     if (err) {
       console.error(err);
       res.status(500).json({ error: 'Internal server error' });
     } else {
-      res.status(201).json({ product_id, quantity });
+      res.status(201).json({ productId, quantity });
     }
   });
 });
 
 app.delete('/api/cart/:id', (req, res) => {
-  db.exec('DELETE FROM cart WHERE id = ?', [req.params.id], (err) => {
+  db.run('DELETE FROM cartItems WHERE id = ?', [req.params.id], (err) => {
     if (err) {
       console.error(err);
       res.status(500).json({ error: 'Internal server error' });
@@ -112,7 +112,7 @@ app.put('/api/cart/:id', (req, res) => {
     res.status(400).json({ error: 'Missing required fields' });
     return;
   }
-  db.exec('UPDATE cart SET quantity = ? WHERE id = ?', [quantity, id], (err) => {
+  db.run('UPDATE cartItems SET quantity = ? WHERE id = ?', [quantity, id], (err) => {
     if (err) {
       console.error(err);
       res.status(500).json({ error: 'Internal server error' });
@@ -133,7 +133,7 @@ app.post('/api/checkout', (req, res) => {
     res.status(400).json({ error: 'Missing required fields' });
     return;
   }
-  db.exec(
+  db.run(
     'INSERT INTO orders (name, email, address, phone, total) VALUES (?, ?, ?, ?, ?)',
     [name, email, address, phone, total],
   (err) => {

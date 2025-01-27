@@ -1,6 +1,8 @@
+import AddToCartButton from "@/app/AddToCartButton";
+
 export default async function ProductsPage({ params }: { params: Promise<{ id: string }> }) {
   const id = (await params).id
-  const product = await fetch(`http://localhost:4000/api/products/${id}`)
+  const product: Product = await fetch(`http://localhost:4000/api/products/${id}`)
     .then(res => res.json());
 
   return (
@@ -9,6 +11,7 @@ export default async function ProductsPage({ params }: { params: Promise<{ id: s
       <p>{ product.category }</p>
       <p>{ product.description }</p>
       <p>{ product.price }</p>
+      <AddToCartButton productId={product.id} />
     </div>
   )
 }
