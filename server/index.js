@@ -119,15 +119,10 @@ app.delete('/api/cart/:id', (req, res) => {
 app.put('/api/cart/:id', (req, res) => {
   const { quantity } = req.body;
   const { id } = req.params;
-  console.log('>', {
-    quantity,
-    id,
-  })
+
   if (quantity === undefined || quantity === null) {
-    console.log('>> NULLISH')
     res.status(400).json({ error: 'Missing required fields' });
   } else if (quantity <= 0) {
-    console.log('>> quantity is 0')
     db.run('DELETE FROM cartItems WHERE id = ?', [id], (err) => {
       if (err) {
         console.error(err);
@@ -137,9 +132,7 @@ app.put('/api/cart/:id', (req, res) => {
       }
     })
   } else {
-    console.log('>> updating')
     db.run('UPDATE cartItems SET quantity = ? WHERE id = ?;', [quantity, id], (err, rows) => {
-      console.log('>>>', { err, rows })
       if (err) {
         console.error(err);
         res.status(500).json({ error: 'Internal server error' });
@@ -155,7 +148,23 @@ app.put('/api/cart/:id', (req, res) => {
  * POST /api/checkout
  */
 
+app.get('/api/checkout/total', (_, res) => {
+  db.get(`
+    SELECT SUM(cartItems.quantity * products.price) AS total
+    FROM cartItems
+    JOIN products ON cartItems.productId = products.id;
+  `, (err, rows) => {
+    if (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Internal server error' });
+    } else {
+      res.json(rows);
+    }
+  });
+});
+
 app.post('/api/checkout', (req, res) => {
+  console.log(req.body)
   const { name, email, address, phone, total } = req.body;
   if (!name || !email || !address || !phone || !total) {
     res.status(400).json({ error: 'Missing required fields' });
