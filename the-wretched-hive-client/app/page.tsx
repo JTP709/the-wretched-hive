@@ -1,10 +1,16 @@
 import Products from "./Products";
 
-export default function Home() {
+interface HomeProps {
+  searchParams: Promise<{ page: string }>,
+}
+
+export default async function Home({ searchParams }: HomeProps) {
+  const { page } = await searchParams;
+
   return (
     <>
         <h1 className="font-bold text-xl">Products</h1>
-        <Products />
+        <Products page={page} />
     </>
   );
 }

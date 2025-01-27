@@ -1,10 +1,20 @@
 import Link from "next/link";
 import AddToCartButton from "./AddToCartButton";
+import Pagination from "./Pagination";
 // import Image from "next/image";
 
-export default async function Products() {
-  const products = await fetch('http://localhost:4000/api/products')
+interface ProductsProps {
+  page: string,
+}
+
+export default async function Products({ page }: ProductsProps) {
+  const limit = '5';
+  const queryParams = new URLSearchParams({ page, limit }).toString();
+
+  const productsResponse = await fetch(`http://localhost:4000/api/products?${queryParams}`)
     .then(res => res.json());
+
+  const { data: products, page: currentPage, totalPages } = productsResponse;
 
   return (
     <div>
@@ -33,7 +43,7 @@ export default async function Products() {
           { i !== products.length - 1 && <hr className="mb-4" /> }
         </div>
       ))}
+      <Pagination totalPages={Number(totalPages)} currentPage={Number(currentPage)} />
     </div>
   )
 };
-

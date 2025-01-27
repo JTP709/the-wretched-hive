@@ -35,14 +35,36 @@ process.on('exit', () => {
  */
 
 app.get('/api/products', (req, res) => {
-  db.all('SELECT * FROM products', (err, rows) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 5;
+  const offset = (page - 1) * limit;
+  db.get('SELECT COUNT(*) AS total FROM products', (err, countResults) => {
     if (err) {
       console.error(err);
       res.status(500).json({ error: 'Internal server error' });
     } else {
-      res.json(rows);
+      db.all(`
+        SELECT * FROM products
+        ORDER BY id
+        LIMIT ? OFFSET ?;
+      `, [limit, offset], (err, rows) => {
+        if (err) {
+          console.error(err);
+          res.status(500).json({ error: 'Internal server error' });
+        } else {
+          const total = countResults.total;
+          const totalPages = Math.ceil(total / limit);
+          res.json({
+            page,
+            limit,
+            total,
+            totalPages,
+            data: rows,
+          });
+        }
+      });
     }
-  })
+  });
 });
 
 app.get('/api/products/:id', (req, res) => {
