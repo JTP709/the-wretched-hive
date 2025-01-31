@@ -4,9 +4,9 @@ import Product from "./Product";
 import Order from "./Order";
 
 class CartItem extends Model {
-  id!: number;
-  productId!: number;
-  quantity!: number;
+  public id!: number;
+  public productId!: number;
+  public quantity!: number;
 }
 
 CartItem.init(

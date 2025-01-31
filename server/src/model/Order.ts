@@ -1,14 +1,16 @@
 // models/Order.js
 import { DataTypes, Model } from 'sequelize';
 import sequelize from "./dbInitialize";
+import User from './User';
 
 class Order extends Model {
-  id!: number;
-  name!: string;
-  email!: string;
-  address!: string;
-  phone!: string;
-  total!: number;
+  public id!: number;
+  public name!: string;
+  public email!: string;
+  public address!: string;
+  public phone!: string;
+  public total!: number;
+  public userId!: number;
 }
 
 Order.init(
@@ -37,6 +39,14 @@ Order.init(
     total: {
       type: DataTypes.DOUBLE,
       allowNull: false,
+    },
+    userId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: User,
+        key: 'id',
+      },
     },
   },
   {
