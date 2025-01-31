@@ -1,18 +1,14 @@
 import express from 'express';
-import getCheckoutControllers from '../controllers/checkout';
+import {
+  get_checkout_total,
+  post_checkout,
+} from '../controllers/checkout';
 
-const getCheckoutRoutes = (db: any) => {
-  const {
-    get_checkout_total,
-    post_checkout,
-  } = getCheckoutControllers(db);
   
-  const router = express.Router();
-  
-  router.get('/total', get_checkout_total);
-  router.post('/', post_checkout);
+const router = express.Router();
 
-  return router;
-}
+router.get('/total', get_checkout_total);
+router.post('/', post_checkout);
 
-export default getCheckoutRoutes;
+
+export default router;

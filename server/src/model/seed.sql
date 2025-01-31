@@ -1,27 +1,27 @@
-CREATE TABLE products (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
-    price REAL NOT NULL,
-    image TEXT NOT NULL,
-    category TEXT NOT NULL,
-    description TEXT NOT NULL
-);
+-- CREATE TABLE products (
+--     id INTEGER PRIMARY KEY AUTOINCREMENT,
+--     name TEXT NOT NULL,
+--     price REAL NOT NULL,
+--     image TEXT NOT NULL,
+--     category TEXT NOT NULL,
+--     description TEXT NOT NULL
+-- );
 
-CREATE TABLE cartItems (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    productId INTEGER NOT NULL UNIQUE,
-    quantity INTEGER NOT NULL,
-    FOREIGN KEY (productId) REFERENCES products(id)
-);
+-- CREATE TABLE cartItems (
+--     id INTEGER PRIMARY KEY AUTOINCREMENT,
+--     productId INTEGER NOT NULL UNIQUE,
+--     quantity INTEGER NOT NULL,
+--     FOREIGN KEY (productId) REFERENCES products(id)
+-- );
 
-CREATE TABLE orders (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
-    email TEXT NOT NULL,
-    address TEXT NOT NULL,
-    phone TEXT NOT NULL,
-    total REAL NOT NULL
-);
+-- CREATE TABLE orders (
+--     id INTEGER PRIMARY KEY AUTOINCREMENT,
+--     name TEXT NOT NULL,
+--     email TEXT NOT NULL,
+--     address TEXT NOT NULL,
+--     phone TEXT NOT NULL,
+--     total REAL NOT NULL
+-- );
 
 INSERT INTO products (name, price, image, category, description) VALUES
 ('Modified DL-44 Blaster Pistol', 2500.00, '/images/modified-dl-44-blaster-pistol.jpg', 'Gear & Weapons', 'Because sometimes you do have to shoot first.'),

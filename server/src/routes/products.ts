@@ -1,18 +1,12 @@
 import express from 'express';
-import getProductControllers from '../controllers/products';
-
-const getProductRoutes = (db: any) => {
-  const {
-    get_products,
-    get_product_by_id,
-  } = getProductControllers(db);
+import {
+  get_products,
+  get_product_by_id,
+} from '../controllers/products';
   
-  const router = express.Router();
-  
-  router.get('/:id', get_product_by_id);
-  router.get('/', get_products);
+const router = express.Router();
 
-  return router;
-}
+router.get('/:id', get_product_by_id);
+router.get('/', get_products);
 
-export default getProductRoutes;
+export default router;

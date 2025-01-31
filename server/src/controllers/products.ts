@@ -1,53 +1,58 @@
+// controllers/productController.ts
 import { Request, Response } from "express";
-import { Database } from "sqlite3";
+import { Product } from "../model"; // Adjust the import path as needed
 
-const getProductControllers = (db: Database) => ({
-  get_products: (req: Request, res: Response) => {
-    const page = typeof req.query.page === 'string' && parseInt(req.query.page) || 1;
-    const limit = typeof req.query.limit === 'string' && parseInt(req.query.limit) || 5;
+/**
+ * GET /products
+ * Retrieves a paginated list of products.
+ */
+export const get_products = async (req: Request, res: Response) => {
+  try {
+    // Parse pagination parameters from the query string.
+    const page = typeof req.query.page === "string" ? parseInt(req.query.page, 10) : 1;
+    const limit = typeof req.query.limit === "string" ? parseInt(req.query.limit, 10) : 5;
     const offset = (page - 1) * limit;
-    db.get('SELECT COUNT(*) AS total FROM products', (err, countResults: any) => {
-      if (err) {
-        console.error(err);
-        res.status(500).json({ error: 'Internal server error' });
-      } else {
-        db.all(`
-          SELECT * FROM products
-          ORDER BY id
-          LIMIT ? OFFSET ?;
-        `, [limit, offset], (err, rows) => {
-          if (err) {
-            console.error(err);
-            res.status(500).json({ error: 'Internal server error' });
-          } else {
-            const total = countResults.total;
-            const totalPages = Math.ceil(total / limit);
-            res.json({
-              page,
-              limit,
-              total,
-              totalPages,
-              data: rows,
-            });
-          }
-        });
-      }
-    });
-  },
-  get_product_by_id: (req: Request, res: Response) => {
-    db.get('SELECT * FROM products WHERE id = ?', [req.params.id], (err, row) => {
-      if (err) {
-        console.error(err);
-        res.status(500).json({ error: 'Internal server error' });
-      } else {
-        if (row) {
-          res.json(row);
-        } else {
-          res.status(404).json({ error: 'Product not found' });
-        }
-      }
-    });
-  },
-});
 
-export default getProductControllers;
+    // Count the total number of products.
+    const total = await Product.count();
+
+    // Retrieve the paginated products.
+    const products = await Product.findAll({
+      order: [['id', 'ASC']],
+      limit,
+      offset,
+    });
+
+    const totalPages = Math.ceil(total / limit);
+
+    res.json({
+      page,
+      limit,
+      total,
+      totalPages,
+      data: products,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+/**
+ * GET /products/:id
+ * Retrieves a product by its id.
+ */
+export const get_product_by_id = async (req: Request, res: Response) => {
+  try {
+    const product = await Product.findByPk(req.params.id);
+
+    if (product) {
+      res.json(product);
+    } else {
+      res.status(404).json({ error: "Product not found" });
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
