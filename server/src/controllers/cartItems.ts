@@ -1,5 +1,8 @@
-const getCartItemsControllers = (db) => ({
-  get_cart_items: (_, res) => {
+import { Request, Response } from "express";
+import { Database } from "sqlite3";
+
+const getCartItemsControllers = (db: Database) => ({
+  get_cart_items: (_: Request, res: Response) => {
     db.all(`
       SELECT c.id, productId, quantity, name, price, image, category, description 
       FROM cartItems AS c 
@@ -14,7 +17,7 @@ const getCartItemsControllers = (db) => ({
       }
     });
   },
-  post_cart_items: (req, res) => {
+  post_cart_items: (req: Request, res: Response) => {
     const { productId, quantity } = req.body;
     if (!productId || !quantity) {
       res.status(400).json({ error: 'Missing required fields' });
@@ -34,7 +37,7 @@ const getCartItemsControllers = (db) => ({
       }
     });
   },
-  delete_cart_items: (req, res) => {
+  delete_cart_items: (req: Request, res: Response) => {
     db.run('DELETE FROM cartItems WHERE id = ?', [req.params.id], (err) => {
       if (err) {
         console.error(err);
@@ -44,7 +47,7 @@ const getCartItemsControllers = (db) => ({
       }
     });
   },
-  put_cart_items: (req, res) => {
+  put_cart_items: (req: Request, res: Response) => {
     const { quantity } = req.body;
     const { id } = req.params;
   
@@ -60,7 +63,7 @@ const getCartItemsControllers = (db) => ({
         }
       })
     } else {
-      db.run('UPDATE cartItems SET quantity = ? WHERE id = ?;', [quantity, id], (err, rows) => {
+      db.run('UPDATE cartItems SET quantity = ? WHERE id = ?;', [quantity, id], (err) => {
         if (err) {
           console.error(err);
           res.status(500).json({ error: 'Internal server error' });
@@ -72,4 +75,4 @@ const getCartItemsControllers = (db) => ({
   },
 });
 
-module.exports = getCartItemsControllers;
+export default getCartItemsControllers;

@@ -1,7 +1,7 @@
-const express = require('express');
-const getProductControllers = require('../controllers/products');
+import express from 'express';
+import getProductControllers from '../controllers/products';
 
-const getProductRoutes = (db) => {
+const getProductRoutes = (db: any) => {
   const {
     get_products,
     get_product_by_id,
@@ -15,4 +15,4 @@ const getProductRoutes = (db) => {
   return router;
 }
 
-module.exports = getProductRoutes;
+export default getProductRoutes;

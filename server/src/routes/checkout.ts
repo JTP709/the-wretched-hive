@@ -1,7 +1,7 @@
-const express = require('express');
-const getCheckoutControllers = require('../controllers/checkout');
+import express from 'express';
+import getCheckoutControllers from '../controllers/checkout';
 
-const getCheckoutRoutes = (db) => {
+const getCheckoutRoutes = (db: any) => {
   const {
     get_checkout_total,
     post_checkout,
@@ -15,4 +15,4 @@ const getCheckoutRoutes = (db) => {
   return router;
 }
 
-module.exports = getCheckoutRoutes;
+export default getCheckoutRoutes;

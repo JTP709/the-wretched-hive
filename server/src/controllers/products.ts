@@ -1,9 +1,12 @@
-const getProductControllers = (db) => ({
-  get_products: (req, res) => {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 5;
+import { Request, Response } from "express";
+import { Database } from "sqlite3";
+
+const getProductControllers = (db: Database) => ({
+  get_products: (req: Request, res: Response) => {
+    const page = typeof req.query.page === 'string' && parseInt(req.query.page) || 1;
+    const limit = typeof req.query.limit === 'string' && parseInt(req.query.limit) || 5;
     const offset = (page - 1) * limit;
-    db.get('SELECT COUNT(*) AS total FROM products', (err, countResults) => {
+    db.get('SELECT COUNT(*) AS total FROM products', (err, countResults: any) => {
       if (err) {
         console.error(err);
         res.status(500).json({ error: 'Internal server error' });
@@ -31,7 +34,7 @@ const getProductControllers = (db) => ({
       }
     });
   },
-  get_product_by_id: (req, res) => {
+  get_product_by_id: (req: Request, res: Response) => {
     db.get('SELECT * FROM products WHERE id = ?', [req.params.id], (err, row) => {
       if (err) {
         console.error(err);
@@ -47,4 +50,4 @@ const getProductControllers = (db) => ({
   },
 });
 
-module.exports = getProductControllers;
+export default getProductControllers;

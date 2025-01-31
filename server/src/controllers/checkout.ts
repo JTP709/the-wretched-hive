@@ -1,5 +1,8 @@
-const getCheckoutControllers = (db) => ({
-  get_checkout_total: (_, res) => {
+import { Request, Response } from "express";
+import { Database } from "sqlite3";
+
+const getCheckoutControllers = (db: Database) => ({
+  get_checkout_total: (_: Request, res: Response) => {
     db.get(`
       SELECT SUM(cartItems.quantity * products.price) AS total
       FROM cartItems
@@ -13,7 +16,7 @@ const getCheckoutControllers = (db) => ({
       }
     });
   },
-  post_checkout: (req, res) => {
+  post_checkout: (req: Request, res: Response) => {
     const { name, email, address, phone, total } = req.body;
     if (!name || !email || !address || !phone || !total) {
       res.status(400).json({ error: 'Missing required fields' });
@@ -32,7 +35,7 @@ const getCheckoutControllers = (db) => ({
             console.error(err);
             res.status(500).json({ error: 'Internal server error' });
           } else {
-            res.status(201).json({ id: row.id });
+            res.status(201).json({ id: (row as any).id });
           }
         });
       }
@@ -40,4 +43,4 @@ const getCheckoutControllers = (db) => ({
   },
 });
 
-module.exports = getCheckoutControllers;
+export default getCheckoutControllers;

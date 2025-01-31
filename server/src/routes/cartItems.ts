@@ -1,8 +1,8 @@
-const express = require('express');
-const getCartItemsControllers = require('../controllers/cartItems');
+import express from 'express';
+import getCartItemsControllers from '../controllers/cartItems';
 
 
-const getCartItemsRoutes = (db) => {
+const getCartItemsRoutes = (db: any) => {
   const {
     get_cart_items,
     post_cart_items,
@@ -19,4 +19,4 @@ const getCartItemsRoutes = (db) => {
   return router;
 };
 
-module.exports = getCartItemsRoutes;
+export default getCartItemsRoutes;
