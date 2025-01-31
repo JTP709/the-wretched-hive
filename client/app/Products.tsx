@@ -8,8 +8,8 @@ interface ProductsProps {
 }
 
 export default async function Products({ page }: ProductsProps) {
-  const limit = '5';
-  const queryParams = new URLSearchParams({ page, limit }).toString();
+  const pageNum = page || '1';
+  const queryParams = new URLSearchParams({ page: pageNum, limit: '5' }).toString();
 
   const productsResponse = await fetch(`http://localhost:4000/api/products?${queryParams}`)
     .then(res => res.json());
