@@ -1,6 +1,7 @@
 import Link from "next/link";
 import LogoutBtn from "./LogoutBtn";
 import { getUser } from "@/api/server";
+import Image from "next/image";
 
 export default async function Navigation() {
   const user = await getUser();
@@ -10,10 +11,16 @@ export default async function Navigation() {
       <div className="flex flex-row justify-between">
         <ul className="flex flex-row">
           <li className="mr-2">
-            <Link href="/">Home</Link>
+            <Link className="flex flex-row" href="/">
+              Home
+              <Image className="ml-2" src="/home.svg" alt="home" width="24" height="24" />
+            </Link>
           </li>
           <li className="mr-2">
-            <Link href="/cart">Cart</Link>
+            <Link className="flex flex-row" href="/cart">
+              Cart
+              <Image className="ml-2" src="/cart.svg" alt="cart" width="24" height="24" />
+            </Link>
           </li>
         </ul>
         <LogoutBtn user={user} />

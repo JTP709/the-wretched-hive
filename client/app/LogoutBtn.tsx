@@ -36,7 +36,7 @@ export default function LogoutBtn({ user }: LogoutBtnProps) {
     ) : (
       <Link className="flex flex-row" href="/login">
         Log in
-        <Image className="ml-2" src="/login.svg" alt="log out" width="24" height="24" />
+        <Image className="ml-2" src="/login.svg" alt="log in" width="24" height="24" />
       </Link>
     )
 };
