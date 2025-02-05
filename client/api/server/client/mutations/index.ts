@@ -13,16 +13,25 @@ export const usePostSignUp = () => useMutation({
   },
 });
 
+export const usePostLogout = () => useMutation({
+  mutationFn: async () => {
+    return await fetch("/api/auth/logout", {
+      method: "POST",
+      credentials: "include",
+    });
+  },
+});
+
 export const usePostCartItem = () => useMutation({
   mutationFn: async (productId: number) => {
-    return await fetch('/api/cart', {
-      method: 'POST',
-      headers: new Headers({ 'content-type': 'application/json' }),
+    return await fetch("/api/cart", {
+      method: "POST",
+      headers: new Headers({ "content-type": "application/json" }),
       body: JSON.stringify({
         productId,
         quantity: 1
       }),
-      credentials: 'include',
+      credentials: "include",
     });
   },
 });

@@ -1,27 +1,21 @@
 "use client";
 
+import { usePostLogout } from "@/api/server/client/mutations";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 
 interface LogoutBtnProps {
   user: User;
 }
 
 export default function LogoutBtn({ user }: LogoutBtnProps) {
-  const [isPending, setIsPending] = useState(false);
   const router = useRouter();
+  const { mutateAsync: logout, isPending } = usePostLogout();
 
   const handleLogout = async () => {
-    setIsPending(true);
 
-    const logoutResponse = await fetch('/api/auth/logout', {
-      method: "POST",
-      credentials: 'include',
-    });
-
-    setIsPending(false);
+    const logoutResponse = await logout();
 
     if (!logoutResponse.ok) alert('An error has occurred');
     else router.refresh();

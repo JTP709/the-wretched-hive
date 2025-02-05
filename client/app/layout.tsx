@@ -34,8 +34,8 @@ export default function RootLayout({
             <span className="font-bold text-4xl">The Wretched Hive</span>
           </div>
           <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-            <Navigation />
             <Providers>
+              <Navigation />
               {children}
             </Providers>
           </main>
