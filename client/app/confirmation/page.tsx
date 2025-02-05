@@ -1,11 +1,14 @@
+import { getCheckoutTotal } from "@/api/server";
+
 interface ConfirmationProps {
   searchParams: {
-    total: string,
+    orderId: string,
   }
 }
 
 export default async function Confirmation({ searchParams }: ConfirmationProps) {
-  const { total } = await searchParams;
+  const { orderId } = await searchParams;
+  const total = await getCheckoutTotal(orderId);
 
   return (
     <div className="flex flex-col justify-center">

@@ -7,7 +7,7 @@ import {
   
 const router = express.Router();
 
-router.get('/total', get_checkout_total);
+router.get('/total/:id', get_checkout_total);
 router.post('/', post_checkout);
 
 

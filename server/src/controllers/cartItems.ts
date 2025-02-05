@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
-import { CartItem, Product } from "../model";
+import sequelize, { CartItem, Product } from "../model";
 import { AuthRequest } from "../types/global";
+import { Op } from "sequelize";
 
 /**
  * GET /cart-items
@@ -19,6 +20,9 @@ export const get_cart_items = async (req: Request, res: Response) => {
       ],
       where: {
         userId: (req as AuthRequest).userId,
+        orderId: {
+          [Op.is]: null,
+        }
       }
     });
     res.json(cartItems);
@@ -41,17 +45,28 @@ export const post_cart_items = async (req: Request, res: Response) => {
   }
   
   try {
-    // Try to find an existing cart item with the same productId.
-    const [cartItem, created] = await CartItem.findOrCreate({
-      where: { productId, userId },
-      defaults: { quantity },
+    const existingCartItem = await CartItem.findOne({
+      where: {
+        productId,
+        userId,
+        orderId: {
+          [Op.is]: null,
+        },
+      },
     });
-    
-    if (!created) {
-      // If it already exists, increment the quantity.
-      cartItem.quantity += quantity;
-      await cartItem.save();
+
+    if (existingCartItem) {
+      existingCartItem.quantity += quantity;
+      await existingCartItem.save();
+      res.status(200).json({ productId, quantity: existingCartItem.quantity });
+      return;
     }
+    
+    const cartItem = await CartItem.create({
+      productId,
+      userId,
+      quantity,
+    });
     
     res.status(201).json({ productId, quantity: cartItem.quantity });
   } catch (err) {
@@ -66,9 +81,11 @@ export const post_cart_items = async (req: Request, res: Response) => {
  */
 export const delete_cart_items = async (req: Request, res: Response) => {
   const { id } = req.params;
+  const userId = (req as AuthRequest).userId;
+
   try {
     const deleted = await CartItem.destroy({
-      where: { id },
+      where: { id, userId },
     });
     
     if (deleted) {
@@ -90,6 +107,7 @@ export const delete_cart_items = async (req: Request, res: Response) => {
 export const put_cart_items = async (req: Request, res: Response) => {
   const { id } = req.params;
   const { quantity } = req.body;
+  const userId = (req as AuthRequest).userId;
 
   if (quantity === undefined || quantity === null) {
     res.status(400).json({ error: 'Missing required fields' });
@@ -99,7 +117,7 @@ export const put_cart_items = async (req: Request, res: Response) => {
   try {
     if (quantity <= 0) {
       // If the quantity is zero or negative, delete the cart item.
-      const deleted = await CartItem.destroy({ where: { id } });
+      const deleted = await CartItem.destroy({ where: { id, userId } });
 
       if (deleted) {
         res.status(204).json({ id });
@@ -121,6 +139,51 @@ export const put_cart_items = async (req: Request, res: Response) => {
       await cartItem.save();
       res.json({ id, quantity });
     }
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+/**
+ * GET /cart/total
+ * Retrieves the total cart amount by calculating the sum of (quantity * price) 
+ * across all cart items.
+ */
+export const get_cart_total = async (req: Request, res: Response) => {
+  try {
+    const result = await CartItem.findOne({
+      attributes: [
+        [
+          // Calculate the total: SUM(cartItems.quantity * products.price)
+          sequelize.fn(
+            "SUM",
+            sequelize.literal(`"CartItem"."quantity" * "Product"."price"`)
+          ),
+          "total"
+        ]
+      ],
+      include: [
+        {
+          model: Product,
+          as: "product",
+          attributes: [] // no need to retrieve product fields
+        }
+      ],
+      where: {
+        userId: (req as AuthRequest).userId,
+        orderId: {
+          [Op.is]: null,
+        }
+      },
+      raw: true
+    });
+
+    // asserting the type since this query does not return a CartItem
+    const totalResult = result as unknown as { total: number } || null;
+
+    // If there are no cart items, result.total might be null.
+    res.json({ total: totalResult?.total || 0 });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Internal server error' });
