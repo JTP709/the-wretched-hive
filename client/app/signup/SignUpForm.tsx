@@ -5,17 +5,15 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export default function SignUpForm() {
-  const [isPending, setIsPending] = useState(false);
   const [message, setMessage] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [passwordVerify, setPasswordVerify] = useState("");
   const router = useRouter();
-  const { mutate: postSignUp } = usePostSignUp();
+  const { mutate: postSignUp, isPending } = usePostSignUp();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setIsPending(true);
     setMessage("");
     if (password !== passwordVerify) {
       setMessage("Passwords do not match");
@@ -31,9 +29,6 @@ export default function SignUpForm() {
       },
       onError: (err) => {
         setMessage(err?.message || "An error has occurred")
-      },
-      onSettled: () => {
-        setIsPending(false)
       }
     });
   };
