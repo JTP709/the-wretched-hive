@@ -96,6 +96,7 @@ export const getUser = async () => {
   const userResponse = await fetch('http://localhost:4000/api/users/', {
     headers: new Headers({ cookie }),
     credentials: 'include',
+    cache: 'no-store',
   });
 
   const user = await userResponse.json();

@@ -16,16 +16,15 @@ export default function LogoutBtn({ user }: LogoutBtnProps) {
   const handleLogout = async () => {
     setIsPending(true);
 
-    await fetch('/api/auth/logout', {
+    const logoutResponse = await fetch('/api/auth/logout', {
       method: "POST",
       credentials: 'include',
-    }).then(res => {
-      if (!res.ok) alert('An error has occurred');
-      else router.push('/login');
-    }).catch(err => {
-      console.error(err);
-      alert(err.message || 'An error has occurred');
-    }).finally(() => setIsPending(false));
+    });
+
+    setIsPending(false);
+
+    if (!logoutResponse.ok) alert('An error has occurred');
+    else router.refresh();
   };
 
   return user?.username
@@ -35,6 +34,9 @@ export default function LogoutBtn({ user }: LogoutBtnProps) {
         <Image className="ml-2" src="/logout.svg" alt="log out" width="24" height="24" />
       </button>
     ) : (
-      <Link href="/login">Login</Link>
+      <Link className="flex flex-row" href="/login">
+        Log in
+        <Image className="ml-2" src="/login.svg" alt="log out" width="24" height="24" />
+      </Link>
     )
 };

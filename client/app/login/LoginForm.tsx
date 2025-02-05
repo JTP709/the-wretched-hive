@@ -15,18 +15,22 @@ export default function LoginForm() {
     setIsPending(true);
     setMessage("");
 
-    await fetch("/api/auth/login", {
+    const loginResponse = await fetch("/api/auth/login", {
       method: "POST",
       headers: new Headers({ 'content-type': 'application/json' }),
       body: JSON.stringify({ username, password }),
-    }).then(res => {
-      if (!res.ok) {setMessage("An error has occurred");
-      console.log({ res })}
-      else router.push("/");
-    }).catch(err => {
-      console.error(err);
-      setMessage(err.response.data.message || "An error has occurred");
-    }).finally(() => setIsPending(false));
+    });
+
+    setIsPending(false);
+
+    if (!loginResponse.ok) {
+      setMessage((loginResponse as unknown as Error)?.message || "An error has occurred");
+    } else {
+      router.refresh();
+      setTimeout(() => {
+        router.push("/");
+      }, 100);
+    }
   };
 
   const handleUsernameOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {

@@ -19,5 +19,5 @@ export default async function Navigation() {
         <LogoutBtn user={user} />
       </div>
     </nav>
-  )
+  );
 };
