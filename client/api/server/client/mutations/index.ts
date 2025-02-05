@@ -46,3 +46,14 @@ export const useUpdateCartItemQuantity = () => useMutation({
     });
   },
 });
+
+export const useCheckout = () => useMutation({
+  mutationFn: async (formData: { [k: string]: FormDataEntryValue; }) => {
+    return await fetch('/api/checkout', {
+      method: "POST",
+      headers: new Headers({ "content-type": "application/json" }),
+      body: JSON.stringify(formData),
+      credentials: "include",
+    });
+  },
+});

@@ -1,5 +1,6 @@
 "use client";
 
+import { useCheckout } from "@/api/server/client/mutations";
 import { useRouter } from "next/navigation";
 
 interface CheckoutFormProps {
@@ -8,6 +9,7 @@ interface CheckoutFormProps {
 
 export default function CheckoutForm({ total }: CheckoutFormProps) {
   const router = useRouter();
+  const { mutateAsync: checkout, isPending } = useCheckout();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -26,14 +28,11 @@ export default function CheckoutForm({ total }: CheckoutFormProps) {
     const formDataJSON = Object.fromEntries(formData.entries());
     formDataJSON.total = total;
 
-    const checkoutResponse = await fetch('/api/checkout', {
-      method: 'POST',
-      headers: new Headers({ 'content-type': 'application/json' }),
-      body: JSON.stringify(formDataJSON),
-      credentials: 'include',
-    });
+    const checkoutResponse = await checkout(formDataJSON);
 
-    if (!checkoutResponse.ok) {
+    if (checkoutResponse.status === 401 || checkoutResponse.status === 403) {
+      router.push("/login");
+    } else if (!checkoutResponse.ok) {
       alert('There was an issue while trying to complete your purchase.');
     } else {
       const data = await checkoutResponse.json();
@@ -65,6 +64,7 @@ export default function CheckoutForm({ total }: CheckoutFormProps) {
       <button 
         className="mt-4 border-neutral-500 border-2 p-2 cursor-pointer"
         type="submit"
+        disabled={isPending}
       >
         Pay
       </button>
