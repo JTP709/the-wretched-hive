@@ -1,6 +1,5 @@
-// controllers/productController.ts
 import { Request, Response } from "express";
-import { Product } from "../model"; // Adjust the import path as needed
+import { Product } from "../model";
 
 /**
  * GET /products

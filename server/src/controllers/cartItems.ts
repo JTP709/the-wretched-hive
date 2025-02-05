@@ -1,20 +1,25 @@
-// controllers/cartItemsController.ts
 import { Request, Response } from "express";
-import { CartItem, Product } from "../model"; // adjust the import path as needed
+import { CartItem, Product } from "../model";
+import { AuthRequest } from "../types/global";
 
 /**
  * GET /cart-items
  * Retrieves all cart items along with associated product details.
  */
-export const get_cart_items = async (_: Request, res: Response) => {
+export const get_cart_items = async (req: Request, res: Response) => {
   try {
     const cartItems = await CartItem.findAll({
       include: [
         {
           model: Product,
+          as: "product",
+          required: true,
           attributes: ['name', 'price', 'image', 'category', 'description'],
         },
       ],
+      where: {
+        userId: (req as AuthRequest).userId,
+      }
     });
     res.json(cartItems);
   } catch (err) {
@@ -29,6 +34,7 @@ export const get_cart_items = async (_: Request, res: Response) => {
  */
 export const post_cart_items = async (req: Request, res: Response) => {
   const { productId, quantity } = req.body;
+  const userId = (req as AuthRequest).userId;
   if (!productId || !quantity) {
     res.status(400).json({ error: 'Missing required fields' });
     return;
@@ -37,7 +43,7 @@ export const post_cart_items = async (req: Request, res: Response) => {
   try {
     // Try to find an existing cart item with the same productId.
     const [cartItem, created] = await CartItem.findOrCreate({
-      where: { productId },
+      where: { productId, userId },
       defaults: { quantity },
     });
     

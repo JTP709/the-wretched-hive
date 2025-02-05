@@ -11,9 +11,9 @@ export default async function CartItems() {
         <div key={cartItem.id}>
           <div className="flex flex-row justify-between">
             <Link href={`/products/${cartItem.productId}`}>
-              <h1 className="font-bold mb-2 mr-12">{cartItem.name}</h1>
+              <h1 className="font-bold mb-2 mr-12">{cartItem.product.name}</h1>
             </Link>
-            <p>${cartItem.price}</p>
+            <p>${cartItem.product.price}</p>
           </div>
           <Quantity cartItem={cartItem} />
           { i !== cart.length - 1 && <hr className="my-4" /> }

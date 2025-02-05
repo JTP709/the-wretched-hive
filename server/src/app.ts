@@ -30,7 +30,9 @@ app.use('/api/checkout', checkoutRoutes);
     console.log('Connected to database');
 
     if(process.env.NODE_ENV === 'development') {
-      await sequelize.sync();
+      await sequelize.sync({ alter: true });
+      // use if error occurs WARNING: this will delete all data
+      // await sequelize.sync({ force: true })
       console.log('All models were synchronized successfully');
     }
 

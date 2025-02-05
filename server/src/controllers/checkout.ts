@@ -1,13 +1,13 @@
-// controllers/checkoutController.ts
 import { Request, Response } from "express";
-import sequelize, { CartItem, Product, Order } from "../model"; // adjust the path as needed
+import sequelize, { CartItem, Product, Order } from "../model";
+import { AuthRequest } from "../types/global";
 
 /**
  * GET /checkout/total
  * Retrieves the total checkout amount by calculating the sum of (quantity * price) 
  * across all cart items.
  */
-export const get_checkout_total = async (_: Request, res: Response) => {
+export const get_checkout_total = async (req: Request, res: Response) => {
   try {
     const result = await CartItem.findOne({
       attributes: [
@@ -23,9 +23,13 @@ export const get_checkout_total = async (_: Request, res: Response) => {
       include: [
         {
           model: Product,
+          as: "product",
           attributes: [] // no need to retrieve product fields
         }
       ],
+      where: {
+        userId: (req as AuthRequest).userId
+      },
       raw: true
     });
 
