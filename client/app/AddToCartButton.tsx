@@ -1,7 +1,7 @@
 "use client";
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { usePostCartItem } from '@/api/server/client/mutations';
 
 interface AddToCartButtonProps {
   productId: number;
@@ -9,29 +9,22 @@ interface AddToCartButtonProps {
 }
 
 export default function AddToCartButton({ productId, user }: AddToCartButtonProps) {
-  const [isPending, setIsPending] = useState(false);
+  const { mutate: addItemToCart, isPending } = usePostCartItem();
+
   const handleAddToCart = async () => {
-    setIsPending(true);
-    await fetch('/api/cart', {
-      method: 'POST',
-      headers: new Headers({ 'content-type': 'application/json' }),
-      body: JSON.stringify({
-        productId,
-        quantity: 1
-      }),
-      credentials: 'include',
-    }).then((res) => {
-      if (!res.ok) {
-        console.log(res)
-        alert('Error adding product to cart')
-      } else {
-        alert('Product added to cart')
-      };
-    }).catch((err: unknown) => {
-      console.error(err);
-      alert('Error adding product to cart');
-    }).finally(() => {
-      setIsPending(false);
+    addItemToCart(productId, {
+      onSuccess: (res) => {
+        if (!res.ok) {
+          console.log(res)
+          alert('Error adding product to cart')
+        } else {
+          alert('Product added to cart')
+        };
+      },
+      onError: (err) => {
+        console.error(err);
+        alert('Error adding product to cart');
+      },
     });
   };
 
