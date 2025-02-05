@@ -1,6 +1,7 @@
 import Link from "next/link";
 import AddToCartButton from "./AddToCartButton";
 import Pagination from "./Pagination";
+import { getProducts } from "@/api/server";
 // import Image from "next/image";
 
 interface ProductsProps {
@@ -8,11 +9,7 @@ interface ProductsProps {
 }
 
 export default async function Products({ page }: ProductsProps) {
-  const pageNum = page || '1';
-  const queryParams = new URLSearchParams({ page: pageNum, limit: '5' }).toString();
-
-  const productsResponse = await fetch(`http://localhost:4000/api/products?${queryParams}`)
-    .then(res => res.json());
+  const productsResponse = await getProducts(page);
 
   const { data: products, page: currentPage, totalPages } = productsResponse;
 

@@ -1,9 +1,9 @@
+import { getProductDetails } from "@/api/server";
 import AddToCartButton from "@/app/AddToCartButton";
 
 export default async function ProductsPage({ params }: { params: Promise<{ id: string }> }) {
   const id = (await params).id
-  const product: Product = await fetch(`http://localhost:4000/api/products/${id}`)
-    .then(res => res.json());
+  const product = await getProductDetails(id);
 
   return (
     <div>

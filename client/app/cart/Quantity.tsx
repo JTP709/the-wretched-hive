@@ -14,6 +14,7 @@ export default function Quantity({ cartItem }: { cartItem: CartItem }) {
       method: 'PUT',
       headers: new Headers({ 'content-type': 'application/json' }),
       body: JSON.stringify({ quantity: quantity - 1 }),
+      credentials: 'include',
     }).then((res) => {
       if (!res.ok ) {
         console.log(res);
@@ -34,6 +35,7 @@ export default function Quantity({ cartItem }: { cartItem: CartItem }) {
       method: 'PUT',
       headers: new Headers({ 'content-type': 'application/json' }),
       body: JSON.stringify({ quantity: quantity + 1 }),
+      credentials: 'include',
     }).then((res) => {
       if (!res.ok ) {
         console.log(res);

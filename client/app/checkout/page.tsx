@@ -1,20 +1,8 @@
 import CheckoutForm from "./CheckoutForm";
+import { getCartTotal } from "@/api/server";
 
 export default async function Checkout() {
-  const total: string = await fetch('http://localhost:4000/api/checkout/total')
-    .then(res => {
-      if (!res.ok) {
-        console.log(res);
-        alert('There was an issue fetching the cart total');
-      } else {
-        return res.json()
-      }
-    })
-    .then(data => data.total)
-    .catch((err) => {
-      console.error(err);
-      alert('There was an issue fetching the cart total');
-    });
+  const total = await getCartTotal();
 
   return (
     <>

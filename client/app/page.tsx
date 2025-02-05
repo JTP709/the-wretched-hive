@@ -9,8 +9,8 @@ export default async function Home({ searchParams }: HomeProps) {
 
   return (
     <>
-        <h1 className="font-bold text-xl">Products</h1>
-        <Products page={page} />
+      <h1 className="font-bold text-xl">Products</h1>
+      <Products page={page} />
     </>
   );
 }

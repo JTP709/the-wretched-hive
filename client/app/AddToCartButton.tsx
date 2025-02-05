@@ -4,19 +4,20 @@ import { useState } from 'react';
 
 interface AddToCartButtonProps {
   productId: number;
-};
+}
 
 export default function AddToCartButton({ productId }: AddToCartButtonProps) {
   const [isPending, setIsPending] = useState(false);
   const handleAddToCart = async () => {
     setIsPending(true);
-    await fetch('http://localhost:4000/api/cart', {
+    await fetch('/api/cart', {
       method: 'POST',
       headers: new Headers({ 'content-type': 'application/json' }),
       body: JSON.stringify({
         productId,
         quantity: 1
       }),
+      credentials: 'include',
     }).then((res) => {
       if (!res.ok) {
         console.log(res)

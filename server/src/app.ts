@@ -3,15 +3,24 @@ import cors from 'cors';
 import cartItemRoutes from './routes/cartItems';
 import productsRoutes from './routes/products';
 import checkoutRoutes from './routes/checkout';
+import authRoutes from './routes/auth';
 import sequelize from './model';
+import authentication from './middleware/authentication';
+import cookieParser from 'cookie-parser';
 
 const PORT = process.env.PORT || 4000;
 
 const app = express();
 
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:3000',
+  credentials: true,
+}));
 app.use(express.json());
+app.use(cookieParser());
+app.use('/api/auth', authRoutes);
 app.use('/api/products', productsRoutes);
+app.use('/api', authentication);
 app.use('/api/cart', cartItemRoutes);
 app.use('/api/checkout', checkoutRoutes);
 
@@ -20,8 +29,8 @@ app.use('/api/checkout', checkoutRoutes);
     await sequelize.authenticate();
     console.log('Connected to database');
 
-    if(process.env.NODE_ENV !== 'production') {
-      await sequelize.sync({ alter: true });
+    if(process.env.NODE_ENV === 'development') {
+      await sequelize.sync();
       console.log('All models were synchronized successfully');
     }
 

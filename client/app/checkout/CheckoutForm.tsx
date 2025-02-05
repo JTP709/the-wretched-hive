@@ -26,10 +26,11 @@ export default function CheckoutForm({ total }: CheckoutFormProps) {
     const formDataJSON = Object.fromEntries(formData.entries());
     formDataJSON.total = total;
 
-    await fetch('http://localhost:4000/api/checkout', {
+    await fetch('/api/checkout', {
       method: 'POST',
       headers: new Headers({ 'content-type': 'application/json' }),
       body: JSON.stringify(formDataJSON),
+      credentials: 'include',
     }).then((res) => {
       if (!res.ok) {
         alert('There was an issue while trying to complete your purchase.');
