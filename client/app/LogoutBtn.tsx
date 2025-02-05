@@ -1,10 +1,15 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-export default function LogoutBtn() {
+interface LogoutBtnProps {
+  user: User;
+}
+
+export default function LogoutBtn({ user }: LogoutBtnProps) {
   const [isPending, setIsPending] = useState(false);
   const router = useRouter();
 
@@ -23,10 +28,13 @@ export default function LogoutBtn() {
     }).finally(() => setIsPending(false));
   };
 
-  return (
-    <button className="flex flex-row" onClick={handleLogout} disabled={isPending}>
-      Log out
-      <Image className="ml-2" src="/logout.svg" alt="log out" width="24" height="24" />
-    </button>
-  )
+  return user?.username
+    ? (
+      <button className="flex flex-row" onClick={handleLogout} disabled={isPending}>
+        Log out
+        <Image className="ml-2" src="/logout.svg" alt="log out" width="24" height="24" />
+      </button>
+    ) : (
+      <Link href="/login">Login</Link>
+    )
 };

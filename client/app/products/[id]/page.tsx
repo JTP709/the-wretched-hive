@@ -1,9 +1,10 @@
-import { getProductDetails } from "@/api/server";
+import { getProductDetails, getUser } from "@/api/server";
 import AddToCartButton from "@/app/AddToCartButton";
 
 export default async function ProductsPage({ params }: { params: Promise<{ id: string }> }) {
   const id = (await params).id
   const product = await getProductDetails(id);
+  const user = await getUser();
 
   return (
     <div>
@@ -18,7 +19,7 @@ export default async function ProductsPage({ params }: { params: Promise<{ id: s
         <img src="https://placehold.co/256x256" alt="placeholder image" />
         <div className="ml-4">
           <p>{ product.description }</p>
-          <AddToCartButton productId={product.id} />
+          <AddToCartButton productId={product.id} user={user} />
         </div>
       </div>
     </div>

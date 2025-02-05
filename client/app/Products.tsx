@@ -1,7 +1,7 @@
 import Link from "next/link";
 import AddToCartButton from "./AddToCartButton";
 import Pagination from "./Pagination";
-import { getProducts } from "@/api/server";
+import { getProducts, getUser } from "@/api/server";
 // import Image from "next/image";
 
 interface ProductsProps {
@@ -9,6 +9,7 @@ interface ProductsProps {
 }
 
 export default async function Products({ page }: ProductsProps) {
+  const user = await getUser();
   const productsResponse = await getProducts(page);
 
   const { data: products, page: currentPage, totalPages } = productsResponse;
@@ -32,7 +33,7 @@ export default async function Products({ page }: ProductsProps) {
             <div className="ml-4 w-full">
               <p>{product.description}</p>
               <div className="w-full flex justify-end align-bottom">
-                <AddToCartButton productId={product.id} />
+                <AddToCartButton productId={product.id} user={user} />
               </div>
             </div>
           </div>

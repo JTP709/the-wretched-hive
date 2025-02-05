@@ -87,3 +87,18 @@ export const getCheckoutTotal = async (orderId: string) => {
 
   return data?.total || 0;
 };
+
+// Users AUTHENTICATED
+
+export const getUser = async () => {
+  const incomingHeaders = headers();
+  const cookie = (await incomingHeaders).get('cookie') || '';
+  const userResponse = await fetch('http://localhost:4000/api/users/', {
+    headers: new Headers({ cookie }),
+    credentials: 'include',
+  });
+
+  const user = await userResponse.json();
+
+  return user;
+};

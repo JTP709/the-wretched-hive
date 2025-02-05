@@ -4,6 +4,7 @@ import cartItemRoutes from './routes/cartItems';
 import productsRoutes from './routes/products';
 import checkoutRoutes from './routes/checkout';
 import authRoutes from './routes/auth';
+import usersRoutes from './routes/users';
 import sequelize from './model';
 import authentication from './middleware/authentication';
 import cookieParser from 'cookie-parser';
@@ -23,6 +24,7 @@ app.use('/api/products', productsRoutes);
 app.use('/api', authentication);
 app.use('/api/cart', cartItemRoutes);
 app.use('/api/checkout', checkoutRoutes);
+app.use('/api/users', usersRoutes);
 
 (async function Main() {
   try {

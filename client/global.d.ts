@@ -20,3 +20,7 @@ type GetCartResponse = {
   productId: number,
   quantity: number,
 }
+
+type User = {
+  username: string;
+}
