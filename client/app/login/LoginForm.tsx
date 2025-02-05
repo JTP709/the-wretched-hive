@@ -1,27 +1,21 @@
 "use client";
 
+import { useLogin } from "@/api/server/client/mutations";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export default function LoginForm() {
-  const [isPending, setIsPending] = useState(false);
   const [message, setMessage] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const router = useRouter();
+  const { mutateAsync: login, isPending } = useLogin();
 
   const handleOnSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setIsPending(true);
     setMessage("");
 
-    const loginResponse = await fetch("/api/auth/login", {
-      method: "POST",
-      headers: new Headers({ 'content-type': 'application/json' }),
-      body: JSON.stringify({ username, password }),
-    });
-
-    setIsPending(false);
+    const loginResponse = await login({ username, password });
 
     if (!loginResponse.ok) {
       setMessage((loginResponse as unknown as Error)?.message || "An error has occurred");
