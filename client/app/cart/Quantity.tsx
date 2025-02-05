@@ -1,53 +1,36 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useUpdateCartItemQuantity } from "@/api/server/client/mutations";
 
 export default function Quantity({ cartItem }: { cartItem: CartItem }) {
-  const [isPending, setIsPending] = useState(false);
   const router = useRouter();
   const { id, quantity } = cartItem;
-
-  const handleDecrement = async () => {
-    setIsPending(true);
-    await fetch(`http://localhost:4000/api/cart/${id}`, {
-      method: 'PUT',
-      headers: new Headers({ 'content-type': 'application/json' }),
-      body: JSON.stringify({ quantity: quantity - 1 }),
-      credentials: 'include',
-    }).then((res) => {
+  const { mutate: updateQuantity, isPending } = useUpdateCartItemQuantity();
+  const options = {
+    onSuccess (res: Response) {
       if (!res.ok ) {
         console.log(res);
         alert('Update cart failed.');
       };
-    }).catch((err) => {
+    },
+    onError (err: Error) {
       console.error(err);
       alert('Update cart failed.');
-    }).finally(() => {
-      setIsPending(false);
+    },
+    onSettled () {
       router.refresh();
-    });
+    },
+  }
+
+  const handleDecrement = async () => {
+    const newQuantity = quantity - 1;
+    updateQuantity({ cartId: id, quantity: newQuantity }, options);
   };
 
   const handleIncrement = async () => {
-    setIsPending(true);
-    await fetch(`http://localhost:4000/api/cart/${id}`, {
-      method: 'PUT',
-      headers: new Headers({ 'content-type': 'application/json' }),
-      body: JSON.stringify({ quantity: quantity + 1 }),
-      credentials: 'include',
-    }).then((res) => {
-      if (!res.ok ) {
-        console.log(res);
-        alert('Update cart failed.');
-      };
-    }).catch((err) => {
-      console.error(err);
-      alert('Update cart failed.');
-    }).finally(() => {
-      setIsPending(false);
-      router.refresh();
-    });
+    const newQuantity = quantity + 1;
+    updateQuantity({ cartId: id, quantity: newQuantity }, options);
   };
 
   return (

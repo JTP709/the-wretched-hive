@@ -35,3 +35,14 @@ export const usePostCartItem = () => useMutation({
     });
   },
 });
+
+export const useUpdateCartItemQuantity = () => useMutation({
+  mutationFn: async ({ cartId, quantity }: { cartId: number; quantity: number }) => {
+    return await fetch(`http://localhost:4000/api/cart/${cartId}`, {
+      method: "PUT",
+      headers: new Headers({ 'content-type': 'application/json' }),
+      body: JSON.stringify({ quantity }),
+      credentials: 'include',
+    });
+  },
+});
