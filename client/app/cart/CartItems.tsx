@@ -1,20 +1,9 @@
 import Link from "next/link";
 import Quantity from "./Quantity";
-import { redirect } from "next/navigation";
+import { getCartItems } from "@/api/server";
 
 export default async function CartItems() {
-  const cart = await fetch('http://localhost:4000/api/cart', {
-    credentials: 'include',
-  }).then(res => {
-    if (res.status === 401 || res.status === 403) {
-      redirect('/login');
-    } else if (!res.ok) {
-      console.log('There was an issue fetching cart items', res);
-      redirect('/error');
-    } else {
-      return res.json();
-    }
-  });
+  const cart = await getCartItems();
 
   return ( 
     <div>

@@ -1,9 +1,35 @@
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
+// Products
+
+export const getProducts = async (page?: string) => {
+  const pageNum = page || '1';
+  const queryParams = new URLSearchParams({ page: pageNum, limit: '5' }).toString();
+  const productsResponse = await fetch(`http://localhost:4000/api/products?${queryParams}`, {
+    credentials: 'include',
+  });
+  const products = await productsResponse.json();
+  
+  return products;
+}
+
+export const getProductDetails = async (id: string) => {
+  const productResponse = await fetch(`http://localhost:4000/api/products/${id}`);
+  const product: Product = await productResponse.json();
+  
+  return product;
+}
+
+// Cart Items AUTHENTICATED
+
 export const getCartTotal = async () => {
+  const incomingHeaders = headers();
+  const cookie = (await incomingHeaders).get('cookie') || '';
   const totalResponse = await fetch('http://localhost:4000/api/checkout/total', {
-      credentials: 'include',
-    });
+    headers: new Headers({ cookie }),
+    credentials: 'include',
+  });
   
   if (totalResponse.status === 401 || totalResponse.status === 403) {
     redirect('/login');
@@ -13,25 +39,28 @@ export const getCartTotal = async () => {
     redirect('/error');
   }
 
-  const total: string = await totalResponse.json();
+  const data = await totalResponse.json();
 
-  return total;
+  return data?.total || 0;
 };
 
-export const getProducts = async (page?: string) => {
-  const pageNum = page || '1';
-  const queryParams = new URLSearchParams({ page: pageNum, limit: '5' }).toString();
-  const productsResponse = await fetch(`http://localhost:4000/api/products?${queryParams}`, {
+export const getCartItems = async () => {
+  const incomingHeaders = headers();
+  const cookie = (await incomingHeaders).get('cookie') || '';
+  const cartResponse = await fetch('http://localhost:4000/api/cart', {
+    headers: new Headers({ cookie }),
     credentials: 'include',
   });
-  const products = await productsResponse.json();
+  
+  if (cartResponse.status === 401 || cartResponse.status === 403) {
+    redirect('/login');
+  }
 
-  return products;
-}
+  if (!cartResponse.ok) {
+    redirect('/error');
+  }
 
-export const getProductDetails = async (id: string) => {
-  const productResponse = await fetch(`http://localhost:4000/api/products/${id}`);
-  const product: Product = await productResponse.json();
+  const cart = await cartResponse.json();
 
-  return product;
-}
+  return cart;
+};

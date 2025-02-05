@@ -4,7 +4,10 @@ import { AuthRequest } from '../types/global';
 
 const authentication = (req: Request, res: Response, next: NextFunction) => {
   const token = req.cookies?.token || req.headers.authorization?.split(' ')[1];
-
+  console.log({
+    cookies: req.cookies,
+    headers: req.headers,
+  })
   if (!token) {
     res.status(403).json({ message: "No token provided" });
     return;
