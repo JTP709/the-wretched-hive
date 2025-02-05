@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navigation from "./Navigation";
+import Providers from "./providers";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,7 +35,9 @@ export default function RootLayout({
           </div>
           <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
             <Navigation />
-            {children}
+            <Providers>
+              {children}
+            </Providers>
           </main>
           <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
           </footer>
