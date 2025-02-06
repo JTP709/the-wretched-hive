@@ -5,7 +5,7 @@ class User extends Model {
   public id!: number;
   public username!: string;
   public password!: string;
-  public refreshToken?: string;
+  public refreshToken?: string | null;
 }
 
 User.init(

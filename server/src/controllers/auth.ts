@@ -71,15 +71,30 @@ export const login = async (req: Request, res: Response) => {
   }
 };
 
-export const logout = (_: Request, res: Response) => {
-  res.cookie('token', '', {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
-    expires: new Date(0),
-  });
+export const logout = async (req: Request, res: Response) => {
+  const refreshToken = req.cookies.refreshToken;
+  if (!refreshToken) {
+    res.status(404);
+    return;
+  }
 
-  res.status(200).json({ message: 'Logout successful' });
+  try {
+    const user = await User.findOne({ where: { refreshToken } });
+    if (user) {
+      user.refreshToken = null;
+      await user.save();
+    }
+
+    res.clearCookie('refreshToken', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+    });
+
+    res.status(204).json({ message: 'Logout successful' });
+  } catch (err) {
+    handleErrors(res, err);
+  }
 };
 
 export const refresh_token = async (req: Request, res: Response) => {
