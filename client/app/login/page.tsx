@@ -11,6 +11,11 @@ export default function LoginPage() {
         <br />
         <Link href="/signup">Click here to sign up</Link>
       </p>
+      <p>
+        Forgot your password?
+        <br />
+        <Link href="/forgot-password">Click here to reset</Link>
+      </p>
     </>
   );
 };

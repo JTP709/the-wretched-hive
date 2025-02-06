@@ -18,7 +18,8 @@ export default function LoginForm() {
     const loginResponse = await login({ username, password });
 
     if (!loginResponse.ok) {
-      setMessage((loginResponse as unknown as Error)?.message || "An error has occurred");
+      const data = await loginResponse.json();
+      setMessage(data?.message || "An error has occurred");
     } else {
       router.refresh();
       setTimeout(() => {

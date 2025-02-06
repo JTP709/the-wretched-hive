@@ -11,11 +11,11 @@ export default async function sendPasswordResetEmail(email: string, resetLink: s
   });
 
   const message = {
-    from: "no-reply@jabbaspalace.com",
+    from: "no-reply@demomailtrap.com",
     to: email,
     subject: "Password Reset",
     text: `You requested a password reset, use this link to reset: ${resetLink}`,
   };
 
-  await transporter.sendMail(message);
+  await transporter.sendMail(message)
 };
