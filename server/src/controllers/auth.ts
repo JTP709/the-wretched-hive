@@ -75,7 +75,7 @@ export const login = async (req: Request, res: Response) => {
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
-    res.cookie('X-CSRF-TOKEN', csrfToken, {
+    res.cookie('XSRF-TOKEN', csrfToken, {
       httpOnly: false,
       secure: process.env.NODE_ENV === 'production',
       sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
