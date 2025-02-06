@@ -1,9 +1,9 @@
 import { getCheckoutTotal } from "@/api/server";
 
 interface ConfirmationProps {
-  searchParams: {
+  searchParams: Promise<{
     orderId: string,
-  }
+  }>
 }
 
 export default async function Confirmation({ searchParams }: ConfirmationProps) {
