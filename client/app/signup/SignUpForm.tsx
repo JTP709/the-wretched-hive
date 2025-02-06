@@ -1,6 +1,6 @@
 "use client";
 
-import { usePostSignUp } from "@/api/server/client/mutations";
+import { useSignUp } from "@/api/server/client/mutations";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -10,7 +10,7 @@ export default function SignUpForm() {
   const [password, setPassword] = useState("");
   const [passwordVerify, setPasswordVerify] = useState("");
   const router = useRouter();
-  const { mutate: postSignUp, isPending } = usePostSignUp();
+  const { mutate: postSignUp, isPending } = useSignUp();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();

@@ -10,7 +10,7 @@ export const useLogin = () => useMutation({
   }
 });
 
-export const usePostSignUp = () => useMutation({
+export const useSignUp = () => useMutation({
   mutationFn: async ({ username, password }: { username: string; password: string; }) => {
     return await fetch("http://localhost:4000/api/auth/signup",{
       method: "POST",
@@ -23,7 +23,7 @@ export const usePostSignUp = () => useMutation({
   },
 });
 
-export const usePostLogout = () => useMutation({
+export const useLogout = () => useMutation({
   mutationFn: async () => {
     return await fetch("/api/auth/logout", {
       method: "POST",
@@ -32,7 +32,7 @@ export const usePostLogout = () => useMutation({
   },
 });
 
-export const usePostCartItem = () => useMutation({
+export const useCreateCartItem = () => useMutation({
   mutationFn: async (productId: number) => {
     return await fetch("/api/cart", {
       method: "POST",

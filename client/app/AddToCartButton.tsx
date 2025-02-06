@@ -1,7 +1,7 @@
 "use client";
 
 import Link from 'next/link';
-import { usePostCartItem } from '@/api/server/client/mutations';
+import { useCreateCartItem } from '@/api/server/client/mutations';
 
 interface AddToCartButtonProps {
   productId: number;
@@ -9,7 +9,7 @@ interface AddToCartButtonProps {
 }
 
 export default function AddToCartButton({ productId, user }: AddToCartButtonProps) {
-  const { mutate: addItemToCart, isPending } = usePostCartItem();
+  const { mutate: addItemToCart, isPending } = useCreateCartItem();
 
   const handleAddToCart = async () => {
     addItemToCart(productId, {
