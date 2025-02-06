@@ -3,6 +3,7 @@
 import { useCallback, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import debounce from "lodash/debounce";
+import Image from "next/image";
 
 export default function Search() {
   const router = useRouter();
@@ -13,7 +14,8 @@ export default function Search() {
   const setSearchParam = useCallback(
     debounce((query: string) => {
       const params = new URLSearchParams(searchParams.toString());
-      params.set("search", query);
+      if (query) params.set("search", query);
+      else params.delete("search");
 
       router.push(`${pathname}?${params}`);
     }, 500),
@@ -26,16 +28,26 @@ export default function Search() {
     setSearchParam(value);
   };
 
+  const handleClearSearch = () => {
+    setQuery("");
+    setSearchParam("");
+  }
+
   return (
-    <label>
-      Search:
-        <input
-          className="ml-2 text-black"
-          type="text"
-          placeholder="Thermal Detonator"
-          onChange={handleOnChange}
-          value={query}
-        />
-    </label>
+    <div className="flex flex-row">
+      <label>
+        Search:
+          <input
+            className="ml-2 text-black"
+            type="text"
+            placeholder="Thermal Detonator"
+            onChange={handleOnChange}
+            value={query}
+          />
+      </label>
+      <button onClick={handleClearSearch}>
+        <Image className="ml-2" src="/backspace.svg" alt="clear search" width="24" height="24" />
+      </button>
+    </div>
   )
 };
