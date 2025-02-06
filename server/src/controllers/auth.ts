@@ -2,10 +2,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { Request, Response } from 'express';
 import User from '../model/User';
-import { handleErrors } from '../utils';
-
-const SECRET_KEY = process.env.SECRET_KEY || 'secret_key';
-const TOKEN_EXPIRATION = '1h';
+import { generateAccessToken, generateRefreshToken, handleErrors, REFRESH_TOKEN_SECRET } from '../utils';
 
 export const signup = async (req: Request, res: Response) => {
   const { username, password } = req.body;
@@ -56,20 +53,19 @@ export const login = async (req: Request, res: Response) => {
       return;
     }
 
-    const token = jwt.sign(
-      { id: user.id, username: user.username },
-      SECRET_KEY,
-      { expiresIn: TOKEN_EXPIRATION }
-    );
+    const accessToken = generateAccessToken(user.id);
+    const refreshToken = generateRefreshToken(user.id);
 
-    res.cookie('token', token, {
+    user.refreshToken = refreshToken;
+    await user.save();
+
+    res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
-      maxAge: 60 * 60 * 1000, // 1 hour
     });
 
-    res.status(201).json({ message: 'Login successful', token });
+    res.status(201).json({ message: 'Login successful', accessToken });
   } catch (err) {
     handleErrors(res, err);
   }
@@ -84,4 +80,28 @@ export const logout = (_: Request, res: Response) => {
   });
 
   res.status(200).json({ message: 'Logout successful' });
+};
+
+export const refresh_token = async (req: Request, res: Response) => {
+  const refreshToken = req.cookies.refreshToken;
+
+  if (!refreshToken) {
+    res.status(401).json({ message: "Unauthorized" });
+    return;
+  }
+
+  try {
+    const { userId } = jwt.verify(refreshToken, REFRESH_TOKEN_SECRET) as { userId: number };
+    const user = await User.findByPk(userId);
+
+    if (!user || user.refreshToken !== refreshToken) {
+      res.status(403).json({ message: "Invalid refresh token" });
+      return;
+    }
+
+    const newAccessToken = generateAccessToken(user.id);
+    res.status(200).json({ accessToken: newAccessToken });
+  } catch (err) {
+    handleErrors(res, err);
+  }
 };

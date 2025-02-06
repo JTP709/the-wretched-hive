@@ -1,4 +1,15 @@
 import { handleErrors } from "./errors"
-import { generateAccessToken, generateRefreshToken } from "./token"
+import {
+  generateAccessToken,
+  generateRefreshToken,
+  REFRESH_TOKEN_SECRET,
+  ACCESS_TOKEN_SECRET,
+} from "./token"
 
-export { handleErrors, generateAccessToken, generateRefreshToken };
+export {
+  handleErrors,
+  generateAccessToken,
+  generateRefreshToken,
+  REFRESH_TOKEN_SECRET,
+  ACCESS_TOKEN_SECRET,
+};
