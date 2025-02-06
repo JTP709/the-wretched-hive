@@ -1,8 +1,9 @@
+import { clientFetch } from "@/api/utils/apiFetch";
 import { useMutation } from "@tanstack/react-query";
 
 export const useLogin = () => useMutation({
   mutationFn: async ({ username, password }: { username: string; password: string; }) => {
-    return await fetch("/api/auth/login", {
+    return await clientFetch("/api/auth/login", {
       method: "POST",
       headers: new Headers({ "content-type": "application/json" }),
       body: JSON.stringify({ username, password }),
@@ -12,7 +13,7 @@ export const useLogin = () => useMutation({
 
 export const useSignUp = () => useMutation({
   mutationFn: async ({ username, password }: { username: string; password: string; }) => {
-    return await fetch("http://localhost:4000/api/auth/signup",{
+    return await clientFetch("/api/auth/signup",{
       method: "POST",
       headers: new Headers({ "content-type": "application/json" }),
       body: JSON.stringify({
@@ -25,7 +26,7 @@ export const useSignUp = () => useMutation({
 
 export const useLogout = () => useMutation({
   mutationFn: async () => {
-    return await fetch("/api/auth/logout", {
+    return await clientFetch("/api/auth/logout", {
       method: "POST",
       credentials: "include",
     });
@@ -34,7 +35,7 @@ export const useLogout = () => useMutation({
 
 export const useCreateCartItem = () => useMutation({
   mutationFn: async (productId: number) => {
-    return await fetch("/api/cart", {
+    return await clientFetch("/api/cart", {
       method: "POST",
       headers: new Headers({ "content-type": "application/json" }),
       body: JSON.stringify({
@@ -48,7 +49,7 @@ export const useCreateCartItem = () => useMutation({
 
 export const useUpdateCartItemQuantity = () => useMutation({
   mutationFn: async ({ cartId, quantity }: { cartId: number; quantity: number }) => {
-    return await fetch(`http://localhost:4000/api/cart/${cartId}`, {
+    return await clientFetch(`/api/cart/${cartId}`, {
       method: "PUT",
       headers: new Headers({ 'content-type': 'application/json' }),
       body: JSON.stringify({ quantity }),
@@ -59,7 +60,7 @@ export const useUpdateCartItemQuantity = () => useMutation({
 
 export const useCheckout = () => useMutation({
   mutationFn: async (formData: { [k: string]: FormDataEntryValue; }) => {
-    return await fetch('/api/checkout', {
+    return await clientFetch('/api/checkout', {
       method: "POST",
       headers: new Headers({ "content-type": "application/json" }),
       body: JSON.stringify(formData),

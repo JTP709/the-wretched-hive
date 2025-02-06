@@ -1,10 +1,11 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { serverFetch } from "../utils/apiFetch";
 
 export const getCheckoutTotal = async (orderId: string) => {
   const incomingHeaders = headers();
   const cookie = (await incomingHeaders).get('cookie') || '';
-  const totalResponse = await fetch(`http://localhost:4000/api/checkout/total/${orderId}`, {
+  const totalResponse = await serverFetch(`http://localhost:4000/api/checkout/total/${orderId}`, {
     headers: new Headers({ cookie }),
     credentials: 'include',
   });

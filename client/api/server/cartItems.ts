@@ -1,10 +1,11 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { serverFetch } from "../utils/apiFetch";
 
 export const getCartTotal = async () => {
   const incomingHeaders = headers();
   const cookie = (await incomingHeaders).get('cookie') || '';
-  const totalResponse = await fetch('http://localhost:4000/api/cart/total', {
+  const totalResponse = await serverFetch('http://localhost:4000/api/cart/total', {
     headers: new Headers({ cookie }),
     credentials: 'include',
   });
@@ -25,7 +26,7 @@ export const getCartTotal = async () => {
 export const getCartItems = async () => {
   const incomingHeaders = headers();
   const cookie = (await incomingHeaders).get('cookie') || '';
-  const cartResponse = await fetch('http://localhost:4000/api/cart', {
+  const cartResponse = await serverFetch('http://localhost:4000/api/cart', {
     headers: new Headers({ cookie }),
     credentials: 'include',
   });
