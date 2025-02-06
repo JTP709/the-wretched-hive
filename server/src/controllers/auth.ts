@@ -5,6 +5,7 @@ import { CookieOptions, Request, Response } from 'express';
 import User from '../model/User';
 import { generateAccessToken, generateRefreshToken, handleErrors, REFRESH_TOKEN_SECRET, sendPasswordResetEmail } from '../utils';
 import { generateCsrfToken } from '../utils/token';
+import { Op } from 'sequelize';
 
 const baseTokenCookieOptions: CookieOptions = {
   httpOnly: true,
@@ -182,8 +183,9 @@ export const forgot_password = async (req: Request, res: Response) => {
     }
 
     const token = crypto.randomBytes(32).toString("hex");
+    const hashed = crypto.createHash("sha256").update(token).digest("hex");
     const expires = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
-    user.resetPasswordToken = token;
+    user.resetPasswordToken = hashed;
     user.resetPasswordExpires = expires;
     await user.save();
 
@@ -191,6 +193,43 @@ export const forgot_password = async (req: Request, res: Response) => {
     await sendPasswordResetEmail(user.email, resetLink);
 
     res.status(200).json({ message: "If the email exists, reset instructions were sent" });
+  } catch (err) {
+    handleErrors(res, err);
+  }
+};
+
+export const reset_password = async (req: Request, res: Response) => {
+  const { token, newPassword } = req.body;
+
+  if (!token || !newPassword) {
+    res.status(400).json({ message: "Token and new password are required" });
+    return;
+  }
+
+  const hashedFromReq = crypto.createHash("sha256").update(token).digest("hex");
+
+  try {
+    const user = await User.findOne({
+      where: {
+        resetPasswordToken: hashedFromReq,
+        resetPasswordExpires: {
+          [Op.gt]: new Date()
+        }
+      },
+    });
+
+    if (!user) {
+      res.status(400).json({ message: "Invalid or expired token" });
+      return;
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+    user.resetPasswordToken = null;
+    user.resetPasswordExpires = null;
+    await user.save();
+
+    res.status(200).json({ message: "Password reset successful" });
   } catch (err) {
     handleErrors(res, err);
   }

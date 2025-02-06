@@ -14,8 +14,8 @@ class User extends Model {
   public city!: string;
   public planet!: string;
   public postalCode!: string;
-  public resetPasswordToken?: string;
-  public resetPasswordExpires?: Date;
+  public resetPasswordToken?: string | null;
+  public resetPasswordExpires?: Date | null;
 }
 
 User.init(
