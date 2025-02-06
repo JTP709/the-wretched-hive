@@ -24,3 +24,20 @@ type GetCartResponse = {
 type User = {
   username: string;
 }
+
+interface SignUpFormRequest {
+  username: string;
+  password: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  streetAddress: string;
+  streetAddressTwo: string;
+  city: string;
+  planet: string;
+  postalCode: string;
+}
+
+interface SignUpForm extends SignUpFormRequest {
+  passwordVerify: string;
+};

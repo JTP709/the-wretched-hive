@@ -18,7 +18,18 @@ const baseCsrfCookieOptions: CookieOptions = {
 };
 
 export const signup = async (req: Request, res: Response) => {
-  const { username, password } = req.body;
+  const {
+    username,
+    password,
+    email,
+    firstName,
+    lastName,
+    streetAddress,
+    streetAddressTwo,
+    city,
+    planet,
+    postalCode,
+  } = req.body;
 
   if (!username || !password ) {
     res.status(400).json({ message: "Username and password are required" });
@@ -33,7 +44,18 @@ export const signup = async (req: Request, res: Response) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = await User.create({ username, password: hashedPassword });
+    const newUser = await User.create({
+      username,
+      password: hashedPassword,
+      email,
+      firstName,
+      lastName,
+      streetAddress,
+      streetAddressTwo,
+      city,
+      planet,
+      postalCode,
+    });
     
     res.status(201)
       .json({

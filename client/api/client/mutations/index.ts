@@ -12,14 +12,11 @@ export const useLogin = () => useMutation({
 });
 
 export const useSignUp = () => useMutation({
-  mutationFn: async ({ username, password }: { username: string; password: string; }) => {
+  mutationFn: async (userData: SignUpFormRequest) => {
     return await clientFetch("/api/auth/signup",{
       method: "POST",
       headers: new Headers({ "content-type": "application/json" }),
-      body: JSON.stringify({
-        username,
-        password
-      }),
+      body: JSON.stringify(userData),
     });
   },
 });

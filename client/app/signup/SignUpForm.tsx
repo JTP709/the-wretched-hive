@@ -2,30 +2,54 @@
 
 import { useSignUp } from "@/api/client/mutations";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useReducer, useState } from "react";
+import reducer, { defaultState, SignUpFields } from "./reducer";
 
 export default function SignUpForm() {
   const [message, setMessage] = useState("");
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [passwordVerify, setPasswordVerify] = useState("");
+  const [state, dispatch] = useReducer(reducer, defaultState)
+
   const router = useRouter();
   const { mutate: postSignUp, isPending } = useSignUp();
+
+  const {
+    username,
+    password,
+    passwordVerify,
+    email,
+    firstName,
+    lastName,
+    streetAddress,
+    streetAddressTwo,
+    city,
+    planet,
+    postalCode,
+  } = state;
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setMessage("");
-    if (password !== passwordVerify) {
+    if (state.password !== state.passwordVerify) {
       setMessage("Passwords do not match");
       return;
     }
 
-    postSignUp({ username, password }, {
+    postSignUp({
+      username,
+      password,
+      email,
+      firstName,
+      lastName,
+      streetAddress,
+      streetAddressTwo,
+      city,
+      planet,
+      postalCode,
+    }, {
       onSuccess: async (res) => {
         const data = await res.json();
         if (!res.ok) setMessage(data.message)
-        router.push("/login");
-        return data;
+        else router.push("/login");
       },
       onError: (err) => {
         setMessage(err?.message || "An error has occurred")
@@ -33,18 +57,8 @@ export default function SignUpForm() {
     });
   };
 
-  const handleUsernameOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setUsername(e.currentTarget.value);
-    setMessage("");
-  };
-
-  const handlePasswordOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setPassword(e.currentTarget.value);
-    setMessage("");
-  };
-
-  const handlePasswordVerifyOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setPasswordVerify(e.currentTarget.value);
+  const handleChange = (type: SignUpFields) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    dispatch({ type, payload: e.currentTarget.value })
     setMessage("");
   };
 
@@ -61,7 +75,7 @@ export default function SignUpForm() {
           type="text"
           placeholder="ReallyCoolDude99"
           value={username}
-          onChange={handleUsernameOnChange}
+          onChange={handleChange(SignUpFields.USERNAME)}
         />
       </label>
       Password:
@@ -73,7 +87,7 @@ export default function SignUpForm() {
           minLength={8}
           placeholder="pAsSw0rD!"
           value={password}
-          onChange={handlePasswordOnChange}
+          onChange={handleChange(SignUpFields.PASSWORD)}
         />
       </label>
       <label className="flex flex-col">
@@ -85,7 +99,94 @@ export default function SignUpForm() {
           minLength={8}
           placeholder="pAsSw0rD!"
           value={passwordVerify}
-          onChange={handlePasswordVerifyOnChange}
+          onChange={handleChange(SignUpFields.PASSWORDVERIFY)}
+        />
+      </label>
+      <label className="flex flex-col">
+        Email:
+        <input
+          className="my-2 text-black"
+          required
+          type="text"
+          placeholder="BobaFettsVette@hyperspace.com"
+          value={email}
+          onChange={handleChange(SignUpFields.EMAIL)}
+        />
+      </label>
+      <label className="flex flex-col">
+        First name:
+        <input
+          className="my-2 text-black"
+          required
+          type="text"
+          placeholder="Han"
+          value={firstName}
+          onChange={handleChange(SignUpFields.FIRSTNAME)}
+        />
+      </label>
+      <label className="flex flex-col">
+        Last name:
+        <input
+          className="my-2 text-black"
+          required
+          type="text"
+          placeholder="Solo"
+          value={lastName}
+          onChange={handleChange(SignUpFields.LASTNAME)}
+        />
+      </label>
+      <label className="flex flex-col">
+        Street address:
+        <input
+          className="my-2 text-black"
+          required
+          type="text"
+          placeholder="1138 Jabba Drive"
+          value={streetAddress}
+          onChange={handleChange(SignUpFields.STREETADDRESS)}
+        />
+      </label>
+      <label className="flex flex-col">
+        Street address two:
+        <input
+          className="my-2 text-black"
+          type="text"
+          placeholder="Suite 500"
+          value={streetAddressTwo}
+          onChange={handleChange(SignUpFields.STREETADDRESSTWO)}
+        />
+      </label>
+      <label className="flex flex-col">
+        City:
+        <input
+          className="my-2 text-black"
+          required
+          type="text"
+          placeholder="Mos Eisley"
+          value={city}
+          onChange={handleChange(SignUpFields.CITY)}
+        />
+      </label>
+      <label className="flex flex-col">
+        Planet:
+        <input
+          className="my-2 text-black"
+          required
+          type="text"
+          placeholder="Tatooine"
+          value={planet}
+          onChange={handleChange(SignUpFields.PLANET)}
+        />
+      </label>
+      <label className="flex flex-col">
+        Postal code:
+        <input
+          className="my-2 text-black"
+          required
+          type="text"
+          placeholder="01977-1983"
+          value={postalCode}
+          onChange={handleChange(SignUpFields.POSTALCODE)}
         />
       </label>
       <button
