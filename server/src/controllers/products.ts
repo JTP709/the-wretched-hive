@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { Product } from "../model";
+import { Op } from "sequelize";
 
 /**
  * GET /products
@@ -7,19 +8,24 @@ import { Product } from "../model";
  */
 export const get_products = async (req: Request, res: Response) => {
   try {
-    // Parse pagination parameters from the query string.
     const page = typeof req.query.page === "string" ? parseInt(req.query.page, 10) : 1;
     const limit = typeof req.query.limit === "string" ? parseInt(req.query.limit, 10) : 5;
     const offset = (page - 1) * limit;
+    const searchQuery = req.query.search ? String(req.query.search).trim() : null;
 
-    // Count the total number of products.
-    const total = await Product.count();
+    const where = searchQuery
+      ? {
+        [Op.or]: [
+          { name: { [Op.iLike]: `%${searchQuery}%` } },
+          { description: { [Op.iLike]: `%${searchQuery}%` } },
+        ]
+      } : {};
 
-    // Retrieve the paginated products.
-    const products = await Product.findAll({
+    const { count: total, rows: products } = await Product.findAndCountAll({
       order: [['id', 'ASC']],
       limit,
       offset,
+      where,
     });
 
     const totalPages = Math.ceil(total / limit);
