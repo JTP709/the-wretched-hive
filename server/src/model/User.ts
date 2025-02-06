@@ -5,6 +5,7 @@ class User extends Model {
   public id!: number;
   public username!: string;
   public password!: string;
+  public refreshToken?: string;
 }
 
 User.init(
@@ -22,7 +23,11 @@ User.init(
     password: {
       type: DataTypes.STRING,
       allowNull: false,
-    }
+    },
+    refreshToken: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
   },
   {
     sequelize,
