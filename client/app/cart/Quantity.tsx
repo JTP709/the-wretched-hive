@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useUpdateCartItemQuantity } from "@/api/server/client/mutations";
+import { useUpdateCartItemQuantity } from "@/api/client/mutations";
 
 export default function Quantity({ cartItem }: { cartItem: CartItem }) {
   const router = useRouter();

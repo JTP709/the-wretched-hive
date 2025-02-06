@@ -1,6 +1,6 @@
 "use client";
 
-import { useCheckout } from "@/api/server/client/mutations";
+import { useCheckout } from "@/api/client/mutations";
 import { useRouter } from "next/navigation";
 
 interface CheckoutFormProps {

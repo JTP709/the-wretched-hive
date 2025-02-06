@@ -1,6 +1,6 @@
 "use client";
 
-import { useLogout } from "@/api/server/client/mutations";
+import { useLogout } from "@/api/client/mutations";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";

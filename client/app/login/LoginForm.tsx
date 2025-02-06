@@ -1,6 +1,6 @@
 "use client";
 
-import { useLogin } from "@/api/server/client/mutations";
+import { useLogin } from "@/api/client/mutations";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 

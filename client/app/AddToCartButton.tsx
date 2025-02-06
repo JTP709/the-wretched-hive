@@ -1,7 +1,7 @@
 "use client";
 
 import Link from 'next/link';
-import { useCreateCartItem } from '@/api/server/client/mutations';
+import { useCreateCartItem } from '@/api/client/mutations';
 
 interface AddToCartButtonProps {
   productId: number;
