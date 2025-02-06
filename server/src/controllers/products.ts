@@ -16,8 +16,8 @@ export const get_products = async (req: Request, res: Response) => {
     const where = searchQuery
       ? {
         [Op.or]: [
-          { name: { [Op.iLike]: `%${searchQuery}%` } },
-          { description: { [Op.iLike]: `%${searchQuery}%` } },
+          { name: { [Op.like]: `%${searchQuery}%` } },
+          { description: { [Op.like]: `%${searchQuery}%` } },
         ]
       } : {};
 

@@ -1,6 +1,9 @@
-export const getProducts = async (page?: string) => {
+export const getProducts = async (page?: string, search?: string) => {
   const pageNum = page || '1';
-  const queryParams = new URLSearchParams({ page: pageNum, limit: '5' }).toString();
+  const searchParam: { search: string } | object = search ? { search } : {}
+  const params = { page: pageNum, limit: '5', ...searchParam };
+  const queryParams = new URLSearchParams(params).toString();
+
   const productsResponse = await fetch(`http://localhost:4000/api/products?${queryParams}`, {
     credentials: 'include',
   });

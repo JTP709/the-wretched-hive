@@ -6,17 +6,18 @@ import { getProducts, getUser } from "@/api/server";
 
 interface ProductsProps {
   page: string,
+  search: string,
 }
 
-export default async function Products({ page }: ProductsProps) {
+export default async function Products({ page, search }: ProductsProps) {
   const user = await getUser();
-  const productsResponse = await getProducts(page);
+  const productsResponse = await getProducts(page, search);
 
   const { data: products, page: currentPage, totalPages } = productsResponse;
 
   return (
     <div>
-      {products.map((product: Product, i: number) => (
+      {products?.map((product: Product, i: number) => (
         <div key={product.id}>
           <div className="mb-4 flex flex-row justify-between">
             <div>
