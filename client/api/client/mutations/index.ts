@@ -42,6 +42,16 @@ export const useForgotPassword = () => useMutation({
   },
 });
 
+export const useResetPassword = () => useMutation({
+  mutationFn: async ({ password, token }: { password: string; token: string; }) => {
+    return await clientFetch("/api/auth/reset-password", {
+      method: "POST",
+      headers: new Headers({ "content-type": "application/json" }),
+      body: JSON.stringify({ password, token }),
+    });
+  },
+});
+
 // Cart
 
 export const useCreateCartItem = () => useMutation({

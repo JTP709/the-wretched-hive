@@ -19,8 +19,16 @@ export default function ForgotPasswordForm() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     requestPasswordReset({ email }, {
-      onSuccess: () => setRequestSent(true),
-      onError: (err: Error) => setMessage(err?.message || "An issue has occurred"),
+      onSuccess: async (res) => {
+        if (!res.ok) {
+          const data = await res.json();
+          setMessage(data?.message || "An issue has occurred");
+        }
+        setRequestSent(true)
+      },
+      onError: (err: Error) => {
+        setMessage(err?.message || "An issue has occurred")
+      },
     });
   };
 

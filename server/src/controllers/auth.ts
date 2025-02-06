@@ -199,9 +199,9 @@ export const forgot_password = async (req: Request, res: Response) => {
 };
 
 export const reset_password = async (req: Request, res: Response) => {
-  const { token, newPassword } = req.body;
+  const { token, password } = req.body;
 
-  if (!token || !newPassword) {
+  if (!token || !password) {
     res.status(400).json({ message: "Token and new password are required" });
     return;
   }
@@ -223,7 +223,7 @@ export const reset_password = async (req: Request, res: Response) => {
       return;
     }
 
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
     user.password = hashedPassword;
     user.resetPasswordToken = null;
     user.resetPasswordExpires = null;
