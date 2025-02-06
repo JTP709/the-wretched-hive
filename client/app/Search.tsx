@@ -37,13 +37,13 @@ export default function Search() {
     <div className="flex flex-row">
       <label>
         Search:
-          <input
-            className="ml-2 text-black"
-            type="text"
-            placeholder="Thermal Detonator"
-            onChange={handleOnChange}
-            value={query}
-          />
+        <input
+          className="ml-2 text-black"
+          type="text"
+          placeholder="Thermal Detonator"
+          onChange={handleOnChange}
+          value={query}
+        />
       </label>
       <button onClick={handleClearSearch}>
         <Image className="ml-2" src="/backspace.svg" alt="clear search" width="24" height="24" />
