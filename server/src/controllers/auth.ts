@@ -1,9 +1,21 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { Request, Response } from 'express';
+import { CookieOptions, Request, Response } from 'express';
 import User from '../model/User';
 import { generateAccessToken, generateRefreshToken, handleErrors, REFRESH_TOKEN_SECRET } from '../utils';
 import { generateCsrfToken } from '../utils/token';
+
+const baseTokenCookieOptions: CookieOptions = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+};
+
+const baseCsrfCookieOptions: CookieOptions = {
+  httpOnly: false,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+};
 
 export const signup = async (req: Request, res: Response) => {
   const { username, password } = req.body;
@@ -62,25 +74,16 @@ export const login = async (req: Request, res: Response) => {
     await user.save();
 
     res.cookie('accessToken', accessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+      ...baseTokenCookieOptions,
       maxAge: 15 * 60 *1000, // 15 minutes
     });
 
     res.cookie('refreshToken', refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+      ...baseTokenCookieOptions,
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
-    res.cookie('XSRF-TOKEN', csrfToken, {
-      httpOnly: false,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
-      // maxAge: 15 * 60 * 1000,
-    })
+    res.cookie('XSRF-TOKEN', csrfToken, baseCsrfCookieOptions)
 
     res.status(201).json({ message: 'Login successful' });
   } catch (err) {
@@ -102,11 +105,9 @@ export const logout = async (req: Request, res: Response) => {
       await user.save();
     }
 
-    res.clearCookie('refreshToken', {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
-    });
+    res.clearCookie('accessToken', baseTokenCookieOptions)
+    res.clearCookie('refreshToken', baseTokenCookieOptions);
+    res.clearCookie('XSRF-TOKEN', baseCsrfCookieOptions);
 
     res.status(204).json({ message: 'Logout successful' });
   } catch (err) {
@@ -133,9 +134,7 @@ export const refresh_token = async (req: Request, res: Response) => {
 
     const newAccessToken = generateAccessToken(user.id);
     res.cookie('accessToken', newAccessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+      ...baseTokenCookieOptions,
       maxAge: 15 * 60 * 1000, // 15 minutes
     });
 
