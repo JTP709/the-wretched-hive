@@ -132,8 +132,15 @@ export const refresh_token = async (req: Request, res: Response) => {
     }
 
     const newAccessToken = generateAccessToken(user.id);
-    res.status(200).json({ accessToken: newAccessToken });
+    res.cookie('accessToken', newAccessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+      maxAge: 15 * 60 * 1000, // 15 minutes
+    });
+
+    res.status(200).json({ message: "Token refreshed" });
   } catch (err) {
-    handleErrors(res, err);
+    res.status(403).json({ message: "Invalid or expired refresh token" });
   }
 };
