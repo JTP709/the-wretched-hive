@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import { Request, Response } from 'express';
 import User from '../model/User';
 import { generateAccessToken, generateRefreshToken, handleErrors, REFRESH_TOKEN_SECRET } from '../utils';
+import { generateCsrfToken } from '../utils/token';
 
 export const signup = async (req: Request, res: Response) => {
   const { username, password } = req.body;
@@ -55,17 +56,33 @@ export const login = async (req: Request, res: Response) => {
 
     const accessToken = generateAccessToken(user.id);
     const refreshToken = generateRefreshToken(user.id);
+    const csrfToken = generateCsrfToken();
 
     user.refreshToken = refreshToken;
     await user.save();
+
+    res.cookie('accessToken', accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+      maxAge: 15 * 60 *1000, // 15 minutes
+    });
 
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
-    res.status(201).json({ message: 'Login successful', accessToken });
+    res.cookie('X-CSRF-TOKEN', csrfToken, {
+      httpOnly: false,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+      // maxAge: 15 * 60 * 1000,
+    })
+
+    res.status(201).json({ message: 'Login successful' });
   } catch (err) {
     handleErrors(res, err);
   }
