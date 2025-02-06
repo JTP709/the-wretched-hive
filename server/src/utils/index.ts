@@ -1,6 +1,4 @@
-import { Response } from "express";
+import { handleErrors } from "./errors"
+import { generateAccessToken, generateRefreshToken } from "./token"
 
-export const handleErrors = (res: Response, err: any) => {
-  console.error(err);
-  res.status(500).json({ message: (err as Error)?.message || 'Internal server error' });
-};
+export { handleErrors, generateAccessToken, generateRefreshToken };
