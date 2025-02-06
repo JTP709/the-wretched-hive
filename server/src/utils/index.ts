@@ -5,6 +5,7 @@ import {
   REFRESH_TOKEN_SECRET,
   ACCESS_TOKEN_SECRET,
 } from "./token"
+import sendPasswordResetEmail from "./email";
 
 export {
   handleErrors,
@@ -12,4 +13,5 @@ export {
   generateRefreshToken,
   REFRESH_TOKEN_SECRET,
   ACCESS_TOKEN_SECRET,
+  sendPasswordResetEmail,
 };

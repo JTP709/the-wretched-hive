@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import cartItemRoutes from './routes/cartItems';
@@ -8,6 +9,7 @@ import usersRoutes from './routes/users';
 import sequelize from './model';
 import authentication from './middleware/authentication';
 import cookieParser from 'cookie-parser';
+
 
 const PORT = process.env.PORT || 4000;
 

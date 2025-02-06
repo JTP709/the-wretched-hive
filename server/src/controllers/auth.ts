@@ -1,8 +1,9 @@
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
 import { CookieOptions, Request, Response } from 'express';
 import User from '../model/User';
-import { generateAccessToken, generateRefreshToken, handleErrors, REFRESH_TOKEN_SECRET } from '../utils';
+import { generateAccessToken, generateRefreshToken, handleErrors, REFRESH_TOKEN_SECRET, sendPasswordResetEmail } from '../utils';
 import { generateCsrfToken } from '../utils/token';
 
 const baseTokenCookieOptions: CookieOptions = {
@@ -163,5 +164,34 @@ export const refresh_token = async (req: Request, res: Response) => {
     res.status(200).json({ message: "Token refreshed" });
   } catch (err) {
     res.status(403).json({ message: "Invalid or expired refresh token" });
+  }
+};
+
+export const forgot_password = async (req: Request, res: Response) => {
+  const { email } = req.body;
+  if (!email) {
+    res.status(400).json({ message: "Email is required" });
+    return;
+  }
+
+  try {
+    const user = await User.findOne({ where: { email }});
+    if (!user) {
+      res.status(200).json({ message: "If the email exists, reset instructions were sent" });
+      return;
+    }
+
+    const token = crypto.randomBytes(32).toString("hex");
+    const expires = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
+    user.resetPasswordToken = token;
+    user.resetPasswordExpires = expires;
+    await user.save();
+
+    const resetLink = `http://localhost:3000/reset-password?token=${token}`;
+    await sendPasswordResetEmail(user.email, resetLink);
+
+    res.status(200).json({ message: "If the email exists, reset instructions were sent" });
+  } catch (err) {
+    handleErrors(res, err);
   }
 };
