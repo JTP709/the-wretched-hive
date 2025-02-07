@@ -1,5 +1,5 @@
 import Link from "next/link";
-import LogoutBtn from "./LogoutBtn";
+import LogInOutBtn from "./LogInOutBtn";
 import { getUser } from "@/api/server";
 import Image from "next/image";
 
@@ -23,7 +23,7 @@ export default async function Navigation() {
             </Link>
           </li>
         </ul>
-        <LogoutBtn user={user} />
+        <LogInOutBtn user={user} />
       </div>
     </nav>
   );

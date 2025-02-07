@@ -6,6 +6,7 @@ import productsRoutes from './routes/products';
 import checkoutRoutes from './routes/checkout';
 import authRoutes from './routes/auth';
 import usersRoutes from './routes/users';
+import healthRoutes from './routes/health';
 import sequelize from './model';
 import authentication from './middleware/authentication';
 import cookieParser from 'cookie-parser';
@@ -22,6 +23,7 @@ app.use(cors({
 app.use(express.json());
 app.use(cookieParser());
 app.use('/api', csrfProtection);
+app.use('/api/health', healthRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productsRoutes);
 app.use('/api', authentication);
