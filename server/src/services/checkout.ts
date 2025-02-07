@@ -1,21 +1,31 @@
 import { CartItem, Order } from "../model";
 
 export enum CheckoutActionType {
+  SUCCESS = 'SUCCESS',
   CREATED = 'CREATED',
   NOT_FOUND = 'NOT_FOUND',
 }
 
-export const getOrderTotal = async (orderId: string, userId: string) => {
+type CheckoutServiceResult = Promise<{
+  type: CheckoutActionType,
+  message?: string,
+  data?: Order | { total: number },
+}>
+
+export const getOrderTotal = async (orderId: string, userId: string): CheckoutServiceResult => {
   const result = await Order.findOne({
     attributes: ['total'],
     where: {
       id: orderId,
       userId: userId,
     },
-  });
+  }) as unknown as { total: number } ;
 
   // asserting the type since this query does not return a CartItem
-  return result as unknown as { total: number } || 0;
+  return {
+    type: CheckoutActionType.SUCCESS,
+    data: result || { total: 0 }
+  };
 };
 
 interface OrderDetails {
@@ -27,7 +37,7 @@ interface OrderDetails {
   userId: string;
 }
 
-export const createOrder = async (orderDetails: OrderDetails) => {
+export const createOrder = async (orderDetails: OrderDetails): CheckoutServiceResult => {
   const { userId } = orderDetails;
   const cartItems = await CartItem.findAll({ where: { userId }});
 

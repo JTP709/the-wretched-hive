@@ -21,6 +21,9 @@ import {
   getPaginatedProducts,
   getProduct,
 } from "./products";
+import {
+  getUser
+} from "./users"
 
 export {
   createNewUser,
@@ -38,4 +41,5 @@ export {
   createOrder,
   getPaginatedProducts,
   getProduct,
+  getUser,
 };

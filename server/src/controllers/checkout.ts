@@ -3,6 +3,7 @@ import { AuthRequest } from "../types/global";
 import { handleErrors } from "../utils";
 import { createOrder, getOrderTotal } from "../services";
 import { CheckoutActionType } from "../services/checkout";
+import { Order } from "../model";
 
 /**
  * GET /checkout/total
@@ -13,10 +14,10 @@ export const get_checkout_total = async (req: Request, res: Response) => {
   const userId = (req as AuthRequest).userId;
   const orderId = req.params.id;
   try {
-    const result = await getOrderTotal(orderId, userId);
+    const { data } = await getOrderTotal(orderId, userId);
 
     // If there are no cart items, result.total might be null.
-    res.json({ total: result?.total || 0 });
+    res.json(data);
   } catch (err) {
     handleErrors(res, err);
   }
@@ -45,7 +46,7 @@ export const post_checkout = async (req: Request, res: Response) => {
     const { type, data, message } = await createOrder({ name, email, address, phone, total, userId });
     switch(type) {
       case CheckoutActionType.CREATED:
-        res.status(201).json({ id: data?.id, message });
+        res.status(201).json({ id: (data as Order)?.id, message });
         return;
       case CheckoutActionType.NOT_FOUND:
         res.status(404).json({ message });
