@@ -1,47 +1,32 @@
-import Cookies from 'js-cookie';
+import { cookies } from 'next/headers';
+import { addRefreshToken } from './shared';
 
-const addCsrfHeader = (init?: RequestInit) => {
-  const csrfToken = Cookies.get('XSRF-TOKEN');
-  const headers = new Headers(init?.headers);
-  headers.set('X-CSRF-Token', csrfToken ?? '');
+const parseCookieValue  = (setCookieHeader: string | null, cookieName: string) => {
+  if (!setCookieHeader) return undefined;
 
-  const options: RequestInit = {
-    ...init,
-    credentials: 'include',
-    headers,
-  };
+  const [firstPair] = setCookieHeader.split(";");
+  const trimmed = firstPair.trim();
+  if (trimmed.startsWith(`${cookieName}=`)) {
+    return trimmed.slice(cookieName.length + 1);
+  }
 
-  return options;
+  return undefined;
 };
 
-const addRefreshToken = (url: string) => async (input: RequestInfo, init?: RequestInit) => {
-  const response = await fetch(input, {
-    ...init,
-    credentials: 'include',
-  });
+export const serverFetch = async (...args: [a: RequestInfo, b: RequestInit]) => {
+  const response = await addRefreshToken('http://localhost:4000/api/auth/refresh')(...args);
 
-  if (response.status === 401) {
-    const refreshResponse = await fetch(url, {
-      method: 'POST',
-      credentials: 'include',
+  const setCookieHeader = response.headers.get("set-cookie");
+  const tokenValue = parseCookieValue(setCookieHeader, "XSRF-TOKEN");
+  if (typeof tokenValue === 'string') {
+    const appCookies = await cookies();
+    appCookies.set({
+        name: "XSRF-TOKEN",
+        value: tokenValue,
+        httpOnly: false,
+        secure: process.env.NODE_ENV === 'production',
     });
-
-    if (refreshResponse.ok) {
-      return await fetch(input,{
-        ...init,
-        credentials: 'include',
-      });
-    }
   }
 
   return response;
 };
-
-export const clientFetch = (input: RequestInfo, init?: RequestInit) => {
-  const refreshToken = addRefreshToken('/api/auth/refresh');
-  const csrfOptions = addCsrfHeader(init);
-
-  return refreshToken(input, csrfOptions);
-};
-
-export const serverFetch = addRefreshToken('http://localhost:4000/api/auth/refresh');

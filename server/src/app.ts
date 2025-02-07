@@ -9,7 +9,7 @@ import usersRoutes from './routes/users';
 import sequelize from './model';
 import authentication from './middleware/authentication';
 import cookieParser from 'cookie-parser';
-
+import { csrfProtection } from './middleware/csrf';
 
 const PORT = process.env.PORT || 4000;
 
@@ -21,6 +21,7 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(cookieParser());
+app.use('/api', csrfProtection);
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productsRoutes);
 app.use('/api', authentication);

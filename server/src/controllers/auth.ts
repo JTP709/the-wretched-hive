@@ -1,23 +1,12 @@
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
-import { CookieOptions, Request, Response } from 'express';
+import { Request, Response } from 'express';
 import User from '../model/User';
 import { generateAccessToken, generateRefreshToken, handleErrors, REFRESH_TOKEN_SECRET, sendPasswordResetEmail } from '../utils';
 import { generateCsrfToken } from '../utils/token';
 import { Op } from 'sequelize';
-
-const baseTokenCookieOptions: CookieOptions = {
-  httpOnly: true,
-  secure: process.env.NODE_ENV === 'production',
-  sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
-};
-
-const baseCsrfCookieOptions: CookieOptions = {
-  httpOnly: false,
-  secure: process.env.NODE_ENV === 'production',
-  sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
-};
+import { baseCsrfCookieOptions, baseTokenCookieOptions } from '../utils/cookieOptions';
 
 export const signup = async (req: Request, res: Response) => {
   const {
@@ -92,7 +81,6 @@ export const login = async (req: Request, res: Response) => {
 
     const accessToken = generateAccessToken(user.id);
     const refreshToken = generateRefreshToken(user.id);
-    const csrfToken = generateCsrfToken();
 
     user.refreshToken = refreshToken;
     await user.save();
@@ -106,8 +94,6 @@ export const login = async (req: Request, res: Response) => {
       ...baseTokenCookieOptions,
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
-
-    res.cookie('XSRF-TOKEN', csrfToken, baseCsrfCookieOptions)
 
     res.status(201).json({ message: 'Login successful' });
   } catch (err) {
