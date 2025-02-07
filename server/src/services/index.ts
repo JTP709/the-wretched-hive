@@ -13,6 +13,10 @@ import {
   updateCartItemQuantity,
   calculateCartTotal,
 } from "./cartItems";
+import {
+  getOrderTotal,
+  createOrder,
+} from "./checkout";
 
 export {
   createNewUser,
@@ -26,4 +30,6 @@ export {
   removeProductFromCart,
   updateCartItemQuantity,
   calculateCartTotal,
+  getOrderTotal,
+  createOrder,
 };
