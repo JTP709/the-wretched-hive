@@ -6,6 +6,13 @@ import {
   requestResetPasswordEmail,
   resetUserPassword,
 } from "./auth";
+import {
+  getCartItems,
+  addProductToCart,
+  removeProductFromCart,
+  updateCartItemQuantity,
+  calculateCartTotal,
+} from "./cartItems";
 
 export {
   createNewUser,
@@ -14,4 +21,9 @@ export {
   refreshAuthToken,
   requestResetPasswordEmail,
   resetUserPassword,
+  getCartItems,
+  addProductToCart,
+  removeProductFromCart,
+  updateCartItemQuantity,
+  calculateCartTotal,
 };
