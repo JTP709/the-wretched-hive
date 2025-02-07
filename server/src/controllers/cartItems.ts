@@ -59,13 +59,13 @@ export const delete_cart_items = async (req: Request, res: Response) => {
   const userId = (req as AuthRequest).userId;
 
   try {
-    const result = await removeProductFromCart(id, userId);
-    switch(result.type) {
+    const { type, message } = await removeProductFromCart(id, userId);
+    switch(type) {
       case CartItemActionType.DELETED:
-        res.status(204).json(result.message);
+        res.status(204).json({ message });
         return;
       case CartItemActionType.NOT_FOUND:
-        res.status(404).json(result.message);
+        res.status(404).json({ message });
         return;
       default:
         res.status(500).json({ message: "Internal server error" });
@@ -92,16 +92,16 @@ export const put_cart_items = async (req: Request, res: Response) => {
   }
 
   try {
-    const result = await updateCartItemQuantity(id, userId, quantity);
-    switch(result.type) {
+    const { type, message } = await updateCartItemQuantity(id, userId, quantity);
+    switch(type) {
       case CartItemActionType.DELETED:
-        res.status(204).json(result.message);
+        res.status(204).json({ message });
         return;
       case CartItemActionType.UPDATED:
-        res.status(200).json(result.message);
+        res.status(200).json({ message });
         return;
       case CartItemActionType.NOT_FOUND:
-        res.status(404).json(result.message);
+        res.status(404).json({ message });
         return;
       default:
         res.status(500).json({ message: "Internal server error" });

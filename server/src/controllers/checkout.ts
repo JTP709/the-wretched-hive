@@ -1,5 +1,4 @@
 import { Request, Response } from "express";
-import { CartItem, Order } from "../model";
 import { AuthRequest } from "../types/global";
 import { handleErrors } from "../utils";
 import { createOrder, getOrderTotal } from "../services";
@@ -49,7 +48,7 @@ export const post_checkout = async (req: Request, res: Response) => {
         res.status(201).json({ id: data?.id, message });
         return;
       case CheckoutActionType.NOT_FOUND:
-        res.status(404).json(message);
+        res.status(404).json({ message });
         return;
       default:
         res.status(500).json({ message: "Internal server error" });

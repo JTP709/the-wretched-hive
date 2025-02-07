@@ -17,6 +17,10 @@ import {
   getOrderTotal,
   createOrder,
 } from "./checkout";
+import {
+  getPaginatedProducts,
+  getProduct,
+} from "./products";
 
 export {
   createNewUser,
@@ -32,4 +36,6 @@ export {
   calculateCartTotal,
   getOrderTotal,
   createOrder,
+  getPaginatedProducts,
+  getProduct,
 };

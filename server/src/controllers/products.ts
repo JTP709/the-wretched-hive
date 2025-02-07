@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
-import { Product } from "../model";
-import { Op } from "sequelize";
+import { handleErrors } from "../utils";
+import { getPaginatedProducts, getProduct } from "../services";
+import { PaginatedProductsResponse, ProductsActionType } from "../services/products";
 
 /**
  * GET /products
@@ -10,36 +11,28 @@ export const get_products = async (req: Request, res: Response) => {
   try {
     const page = typeof req.query.page === "string" ? parseInt(req.query.page, 10) : 1;
     const limit = typeof req.query.limit === "string" ? parseInt(req.query.limit, 10) : 5;
-    const offset = (page - 1) * limit;
     const searchQuery = req.query.search ? String(req.query.search).trim() : null;
-
-    const where = searchQuery
-      ? {
-        [Op.or]: [
-          { name: { [Op.like]: `%${searchQuery}%` } },
-          { description: { [Op.like]: `%${searchQuery}%` } },
-        ]
-      } : {};
-
-    const { count: total, rows: products } = await Product.findAndCountAll({
-      order: [['id', 'ASC']],
-      limit,
-      offset,
-      where,
-    });
-
-    const totalPages = Math.ceil(total / limit);
-
-    res.json({
-      page,
-      limit,
-      total,
-      totalPages,
-      data: products,
-    });
+    
+    const { type, data, message } = await getPaginatedProducts(searchQuery, limit, page);
+    switch(type) {
+      case ProductsActionType.SUCCESS:
+        const { total, totalPages, products } = data as PaginatedProductsResponse;
+        res.status(200).json({
+          page,
+          limit,
+          total,
+          totalPages,
+          data: products,
+        });
+        return;
+      case ProductsActionType.NOT_FOUND:
+        res.status(404).json({ message })
+      default:
+        res.status(500).json({ message: "Internal server error" });
+        return;
+    }
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Internal server error" });
+    handleErrors(res, err);
   }
 };
 
@@ -49,15 +42,19 @@ export const get_products = async (req: Request, res: Response) => {
  */
 export const get_product_by_id = async (req: Request, res: Response) => {
   try {
-    const product = await Product.findByPk(req.params.id);
-
-    if (product) {
-      res.json(product);
-    } else {
-      res.status(404).json({ error: "Product not found" });
+    const { type, data, message } = await getProduct(req.params.id);
+    switch(type) {
+      case ProductsActionType.SUCCESS:
+        res.json(data);
+        return;
+      case ProductsActionType.NOT_FOUND:
+        res.status(404).json({ message });
+        return;
+      default:
+        res.status(500).json({ message: "Internal server error" });
+        return;
     }
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Internal server error" });
+    handleErrors(res, err);
   }
 };
