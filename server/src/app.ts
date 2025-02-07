@@ -22,11 +22,11 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(cookieParser());
-app.use('/api', csrfProtection);
+app.use(csrfProtection);
+app.use(authentication);
 app.use('/api/health', healthRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productsRoutes);
-app.use('/api', authentication);
 app.use('/api/cart', cartItemRoutes);
 app.use('/api/checkout', checkoutRoutes);
 app.use('/api/users', usersRoutes);

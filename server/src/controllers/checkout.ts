@@ -1,6 +1,9 @@
 import { Request, Response } from "express";
-import { CartItem, Order } from "../model";
 import { AuthRequest } from "../types/global";
+import { handleErrors } from "../utils";
+import { createOrder, getOrderTotal } from "../services";
+import { CheckoutActionType } from "../services/checkout";
+import { Order } from "../model";
 
 /**
  * GET /checkout/total
@@ -11,22 +14,12 @@ export const get_checkout_total = async (req: Request, res: Response) => {
   const userId = (req as AuthRequest).userId;
   const orderId = req.params.id;
   try {
-    const result = await Order.findOne({
-      attributes: ['total'],
-      where: {
-        id: orderId,
-        userId: userId,
-      },
-    });
-
-    // asserting the type since this query does not return a CartItem
-    const totalResult = result as unknown as { total: number } || null;
+    const { data } = await getOrderTotal(orderId, userId);
 
     // If there are no cart items, result.total might be null.
-    res.json({ total: totalResult?.total || 0 });
+    res.json(data);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Internal server error' });
+    handleErrors(res, err);
   }
 };
 
@@ -38,35 +31,32 @@ export const post_checkout = async (req: Request, res: Response) => {
   const { name, email, address, phone, total } = req.body;
   const userId = (req as AuthRequest).userId;
 
-  if (!name || !email || !address || !phone || total === undefined) {
-    const missingFields = [];
-    if (!name) missingFields.push('name');
-    if (!email) missingFields.push('name');
-    if (!address) missingFields.push('name');
-    if (!phone) missingFields.push('name');
-    if (total === undefined) missingFields.push('total');
-
+  const missingFields = [];
+  if (!name) missingFields.push('name');
+  if (!email) missingFields.push('name');
+  if (!address) missingFields.push('name');
+  if (!phone) missingFields.push('name');
+  if (total === undefined) missingFields.push('total');
+  if (missingFields.length > 0) {
     res.status(400).json({ error: `Missing required fields: ${missingFields}` });
     return;
   }
 
   try {
-    const cartItems = await CartItem.findAll({ where: { userId }});
-
-    if (cartItems.length === 0) {
-      res.status(400).json({ error: "No items in cart to checkout" });
-      return;
+    const { type, data, message } = await createOrder({ name, email, address, phone, total, userId });
+    switch(type) {
+      case CheckoutActionType.CREATED:
+        res.status(201).json({ id: (data as Order)?.id, message });
+        return;
+      case CheckoutActionType.NOT_FOUND:
+        res.status(404).json({ message });
+        return;
+      default:
+        res.status(500).json({ message: "Internal server error" });
+        return;
     }
 
-    const order = await Order.create({ name, email, address, phone, total, userId });
-
-    await Promise.all(
-      cartItems.map(cartItem => cartItem.update({ orderId: order.id }))
-    )
-
-    res.status(201).json({ id: order.id, message: "Order placed successfully" });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Internal server error' });
+    handleErrors(res, err);
   }
 };
