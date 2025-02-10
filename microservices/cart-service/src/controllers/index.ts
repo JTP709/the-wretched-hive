@@ -4,17 +4,14 @@ import { addProductToCart, getCartItems, removeProductFromCart, updateCartItemQu
 import { handleErrors } from "../utils";
 import { calculateCartTotal, CartItemActionType } from "../services";
 
-interface AuthRequest extends Request {
-  userId: string;
-}
-
 /**
  * GET /cart-items
  * Retrieves all cart items along with associated product details.
  */
 export const get_cart_items = async (req: Request, res: Response) => {
+  const userId = req.headers['x-user-id'] as string;
+
   try {
-    const userId = (req as AuthRequest).userId || "1";
     const { data } = await getCartItems(userId);
     res.json(data);
   } catch (err) {
@@ -28,7 +25,7 @@ export const get_cart_items = async (req: Request, res: Response) => {
  */
 export const post_cart_items = async (req: Request, res: Response) => {
   const { productId } = req.body;
-  const userId = req.headers['x-user-id'];
+  const userId = req.headers['x-user-id'] as string;
 
   const missingFields = [];
   if (!productId) missingFields.push('productId');
@@ -39,7 +36,7 @@ export const post_cart_items = async (req: Request, res: Response) => {
   }
   
   try {
-    const result = await addProductToCart(productId, userId as string);
+    const result = await addProductToCart(productId, userId);
     const cartItem = result.data as CartItem;
     switch(result.type) {
       case CartItemActionType.CREATED:
