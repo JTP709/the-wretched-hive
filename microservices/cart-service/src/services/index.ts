@@ -68,37 +68,48 @@ export const getCartItems = async (userId: string): CartServiceResult => {
 
 };
 
-export const addProductToCart = async (productId: string, userId: string, quantity: number): CartServiceResult => {
-  const existingCartItem = await CartItem.findOne({
-    where: {
-      productId,
-      userId,
-      orderId: {
-        [Op.is]: null,
+export const addProductToCart = async (productId: string, userId: string): CartServiceResult => {
+  // Find the active cart
+  // check if item exists in the cart
+  // -- if item exists, increment quantity by 1
+  // -- else create a new cart item
+
+  return await sequelize.transaction(async (transaction) => {
+    let cart = await Cart.findOne({
+      where: {
+        userId,
+        status: CartStatus.ACTIVE,
       },
-    },
-  });
-
-  if (existingCartItem) {
-    existingCartItem.quantity += quantity;
-    await existingCartItem.save();
-
-    return {
-      type: CartItemActionType.UPDATED,
-      data: existingCartItem
-    };
-  }
+      transaction,
+    });
   
-  const cartItem = await CartItem.create({
-    productId,
-    userId,
-    quantity,
+    if (!cart) {
+      cart = await Cart.create({
+        userId,
+      }, { transaction });
+    }
+  
+    const [cartItem, created] = await CartItem.findOrCreate({
+      where: { cartId: cart.id, productId },
+      defaults: { cardId: cart.id, productId, quantity: 1 },
+      transaction,
+    });
+  
+    if (created) {
+      await cartItem.increment('quantity', { by: 1, transaction });
+      await cartItem.reload({ transaction });
+  
+      return {
+        type: CartItemActionType.UPDATED,
+        data: cartItem
+      };
+    }
+  
+    return {
+      type: CartItemActionType.CREATED,
+      data: cartItem,
+    }
   });
-
-  return {
-    type: CartItemActionType.CREATED,
-    data: cartItem,
-  }
 };
 
 export const removeProductFromCart = async (id: string, userId: string): CartServiceResult => {

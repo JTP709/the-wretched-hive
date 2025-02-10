@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import express from 'express';
+import express, { Request } from 'express';
 import cors from 'cors';
 // import cartItemRoutes from './routes/cartItems';
 import productsRoutes from './routes/products';
@@ -11,15 +11,27 @@ import sequelize from './model';
 import authentication from './middleware/authentication';
 import cookieParser from 'cookie-parser';
 import { csrfProtection } from './middleware/csrf';
-import { createProxyMiddleware } from 'http-proxy-middleware';
+import { createProxyMiddleware, errorResponsePlugin, loggerPlugin, proxyEventsPlugin } from 'http-proxy-middleware';
+import { AuthRequest } from './types/global';
 
 const PORT = process.env.PORT || 4000;
-const CART_SERVICE_URL = 'http://localhost:4001/api/cart';
+const CART_SERVICE_URL = 'http://127.0.0.1:4001/api/cart';
 
 const cartServiceProxy = createProxyMiddleware({
   target: CART_SERVICE_URL,
   changeOrigin: true,
-  // pathRewrite: { '^/api/cart': '/api/cart' }
+  on: {
+    proxyReq: (proxyReq, req, res) => {
+      const request = req as AuthRequest;
+      if (request.userId) {
+        proxyReq.setHeader('x-user-id', request.userId.toString())
+      }
+    },
+    error: (err, req, res, target) => {
+      console.log('>>> Proxy error: ', { err, req, res, target })
+    }
+  },
+  plugins: [proxyEventsPlugin, errorResponsePlugin, loggerPlugin]
 });
 
 const app = express();
@@ -28,14 +40,14 @@ app.use(cors({
   origin: 'http://localhost:3000',
   credentials: true,
 }));
-app.use(express.json());
 app.use(cookieParser());
+app.use('/api/cart', authentication, cartServiceProxy);
+app.use(express.json());
 app.use(csrfProtection);
 app.use('/api/health', healthRoutes);
 app.use('/api/products', productsRoutes);
 app.use('/api/auth', authRoutes);
 app.use(authentication);
-app.use('/api/cart', cartServiceProxy);
 // app.use('/api/cart', cartItemRoutes);
 app.use('/api/checkout', checkoutRoutes);
 app.use('/api/users', usersRoutes);

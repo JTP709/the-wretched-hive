@@ -27,19 +27,23 @@ export const get_cart_items = async (req: Request, res: Response) => {
  * Creates a new cart item or increments the quantity of an existing cart item.
  */
 export const post_cart_items = async (req: Request, res: Response) => {
-  const { productId, quantity } = req.body;
-  const userId = (req as AuthRequest).userId;
-  if (!productId || !quantity) {
-    res.status(400).json({ error: 'Missing required fields' });
+  const { productId } = req.body;
+  const userId = req.headers['x-user-id'];
+
+  const missingFields = [];
+  if (!productId) missingFields.push('productId');
+  if (!userId) missingFields.push('userId');
+  if (missingFields.length) {
+    res.status(400).json({ error: `Missing required fields: ${missingFields.join(', ')}` });
     return;
   }
   
   try {
-    const result = await addProductToCart(productId, userId, quantity);
+    const result = await addProductToCart(productId, userId as string);
     const cartItem = result.data as CartItem;
     switch(result.type) {
       case CartItemActionType.CREATED:
-        res.status(201).json({ productId, quantity });
+        res.status(201).json({ productId });
         return;
       case CartItemActionType.UPDATED:
         res.status(200).json({ productId, quantity: cartItem.quantity})
