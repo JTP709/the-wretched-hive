@@ -63,7 +63,7 @@ export const post_cart_items = async (req: Request, res: Response) => {
  */
 export const delete_cart_items = async (req: Request, res: Response) => {
   const { id } = req.params;
-  const userId = (req as AuthRequest).userId;
+  const userId = req.headers['x-user-id'] as string;
 
   try {
     const { type, message } = await removeProductFromCart(id, userId);
@@ -91,7 +91,7 @@ export const delete_cart_items = async (req: Request, res: Response) => {
 export const put_cart_items = async (req: Request, res: Response) => {
   const { id } = req.params;
   const { quantity } = req.body;
-  const userId = (req as AuthRequest).userId;
+  const userId = req.headers['x-user-id'] as string;
 
   if (quantity == null) {
     res.status(400).json({ error: 'Missing required fields' });

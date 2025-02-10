@@ -31,6 +31,10 @@ export const getCartItems = async (userId: string): CartServiceResult => {
     }]
   }) as GetCartResult;
 
+  if (!cart) {
+    await Cart.create({ userId });
+  }
+
   if (cart?.items) {
     const products = await Promise.all(
       cart.items.map(async (item) => {
@@ -95,7 +99,7 @@ export const addProductToCart = async (productId: string, userId: string): CartS
       transaction,
     });
   
-    if (created) {
+    if (!created) {
       await cartItem.increment('quantity', { by: 1, transaction });
       await cartItem.reload({ transaction });
   
@@ -113,8 +117,19 @@ export const addProductToCart = async (productId: string, userId: string): CartS
 };
 
 export const removeProductFromCart = async (id: string, userId: string): CartServiceResult => {
+  let cart = await Cart.findOne({
+    where: {
+      userId,
+      status: CartStatus.ACTIVE
+    }
+  });
+
+  if (!cart) {
+    cart = await Cart.create({ userId });
+  }
+
   const deleted = await CartItem.destroy({
-    where: { id, userId },
+    where: { id, cartId: cart.id },
   });
   
   if (deleted) {
