@@ -1,9 +1,10 @@
-import "./types/global";
+import 'express-async-errors';
 import 'dotenv/config';
 import express from 'express';
 import sequelize from './models';
 // import cors from 'cors';
 import cartItemRoutes from './routes';
+import { globalErrorHandler } from './middleware';
 // import productsRoutes from './routes/products';
 // import checkoutRoutes from './routes/checkout';
 // import authRoutes from './routes/auth';
@@ -28,6 +29,7 @@ app.use(express.json());
 // app.use(csrfProtection);
 // app.use('/api/health', healthRoutes);
 app.use('/api/cart', cartItemRoutes);
+app.use(globalErrorHandler);
 
 (async function Main() {
   try {

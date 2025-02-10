@@ -10,13 +10,9 @@ import { calculateCartTotal, CartItemActionType } from "../services";
  */
 export const get_cart_items = async (req: Request, res: Response) => {
   const userId = req.headers['x-user-id'] as string;
-
-  try {
-    const { data } = await getCartItems(userId);
-    res.json(data);
-  } catch (err) {
-    handleErrors(res, err);
-  }
+  const { data } = await getCartItems(userId);
+  
+  res.json(data);
 };
 
 /**
@@ -35,22 +31,19 @@ export const post_cart_items = async (req: Request, res: Response) => {
     return;
   }
   
-  try {
-    const result = await addProductToCart(productId, userId);
-    const cartItem = result.data as CartItem;
-    switch(result.type) {
-      case CartItemActionType.CREATED:
-        res.status(201).json({ productId });
-        return;
-      case CartItemActionType.UPDATED:
-        res.status(200).json({ productId, quantity: cartItem.quantity})
-        return;
-      default:
-        res.status(500).json({ message: "Internal server error" });
-        return;
-    }
-  } catch (err) {
-    handleErrors(res, err);
+  const result = await addProductToCart(productId, userId);
+  const cartItem = result.data as CartItem;
+  
+  switch(result.type) {
+    case CartItemActionType.CREATED:
+      res.status(201).json({ productId });
+      return;
+    case CartItemActionType.UPDATED:
+      res.status(200).json({ productId, quantity: cartItem.quantity})
+      return;
+    default:
+      res.status(500).json({ message: "Internal server error" });
+      return;
   }
 };
 
@@ -61,22 +54,18 @@ export const post_cart_items = async (req: Request, res: Response) => {
 export const delete_cart_items = async (req: Request, res: Response) => {
   const { id } = req.params;
   const userId = req.headers['x-user-id'] as string;
-
-  try {
-    const { type, message } = await removeProductFromCart(id, userId);
-    switch(type) {
-      case CartItemActionType.DELETED:
-        res.status(204).json({ message });
-        return;
-      case CartItemActionType.NOT_FOUND:
-        res.status(404).json({ message });
-        return;
-      default:
-        res.status(500).json({ message: "Internal server error" });
-        return;
-    }
-  } catch (err) {
-    handleErrors(res, err);
+  const { type, message } = await removeProductFromCart(id, userId);
+  
+  switch(type) {
+    case CartItemActionType.DELETED:
+      res.status(204).json({ message });
+      return;
+    case CartItemActionType.NOT_FOUND:
+      res.status(404).json({ message });
+      return;
+    default:
+      res.status(500).json({ message: "Internal server error" });
+      return;
   }
 };
 
@@ -95,24 +84,21 @@ export const put_cart_items = async (req: Request, res: Response) => {
     return;
   }
 
-  try {
-    const { type, message } = await updateCartItemQuantity(id, userId, quantity);
-    switch(type) {
-      case CartItemActionType.DELETED:
-        res.status(204).json({ message });
-        return;
-      case CartItemActionType.UPDATED:
-        res.status(200).json({ message });
-        return;
-      case CartItemActionType.NOT_FOUND:
-        res.status(404).json({ message });
-        return;
-      default:
-        res.status(500).json({ message: "Internal server error" });
-        return;
-    }
-  } catch (err) {
-    handleErrors(res, err);
+  const { type, message } = await updateCartItemQuantity(id, userId, quantity);
+  
+  switch(type) {
+    case CartItemActionType.DELETED:
+      res.status(204).json({ message });
+      return;
+    case CartItemActionType.UPDATED:
+      res.status(200).json({ message });
+      return;
+    case CartItemActionType.NOT_FOUND:
+      res.status(404).json({ message });
+      return;
+    default:
+      res.status(500).json({ message: "Internal server error" });
+      return;
   }
 };
 
@@ -123,13 +109,7 @@ export const put_cart_items = async (req: Request, res: Response) => {
  */
 export const get_cart_total = async (req: Request, res: Response) => {
   const userId = req.headers['x-user-id'] as string;
+  const { data } = await calculateCartTotal(userId);
 
-  try {
-    const { data } = await calculateCartTotal(userId);
-
-    // If there are no cart items, result.total might be null.
-    res.json({ total: data?.total });
-  } catch (err) {
-    handleErrors(res, err);
-  }
+  res.json({ total: data?.total });
 };
