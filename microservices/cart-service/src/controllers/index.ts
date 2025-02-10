@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import { CartItem } from "../models";
 import { addProductToCart, getCartItems, removeProductFromCart, updateCartItemQuantity } from "../services";
-import { handleErrors } from "../utils";
 import { calculateCartTotal, CartItemActionType } from "../services";
 
 /**
