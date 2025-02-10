@@ -1,22 +1,5 @@
 import sequelize, { Cart, CartItem, CartStatus } from "../models";
-
-export enum CartItemActionType {
-  SUCCESS = 'SUCCESS',
-  NOT_FOUND = 'NOT_FOUND',
-  UPDATED = 'UPDATED',
-  DELETED = 'DELETED',
-  CREATED = 'CREATED',
-}
-
-interface GetCartResult extends Cart {
-  items?: CartItem[]
-}
-
-type CartServiceResult = Promise<{
-  type: CartItemActionType,
-  message?: string,
-  data?: any //Cart | CartItem | null,
-}>
+import { CartItemActionType, CartProducts, CartServiceResult, GetCartResult, Product } from "./types";
 
 const selectCartAndItems = async (userId: string) => {
   const cart = await Cart.findOne({
@@ -37,10 +20,10 @@ const selectCartAndItems = async (userId: string) => {
   return cart;
 };
 
-const fetchProductInfo = async (cart: GetCartResult, userId: string) => {
+const fetchProductInfo = async (cart: GetCartResult, userId: string): Promise<CartProducts[]> => {
   if (!cart?.items) return [];
 
-  return await Promise.all(
+  const productDetails = await Promise.all(
     cart.items.map(async (item) => {
       const result = await fetch(`http://localhost:4000/api/products/${item.productId}`);
       if (!result.ok) {
@@ -48,24 +31,25 @@ const fetchProductInfo = async (cart: GetCartResult, userId: string) => {
           `Could not fetch product details for ${item.productId}`,
           { userId, result, cartId: cart.dataValues.id }
         );
-        return {}
+        return {} as CartProducts;
       }
 
-      const product = await result.json();
+      const product: Product = await result.json();
 
       return {
         id: item.id,
         quantity: item.quantity,
         product,
-      };
+      } as CartProducts;
     })
   );
+
+  return productDetails.filter((product) => Object.keys(product).length > 0);
 }
 
 export const getCartItems = async (userId: string): CartServiceResult => {
   const cart = await selectCartAndItems(userId);
-  const products = await fetchProductInfo(cart, userId);    
-  const data = products.filter(product => Object.keys(product).length > 0);
+  const data = await fetchProductInfo(cart, userId);    
 
   return {
     type: CartItemActionType.SUCCESS,
@@ -74,11 +58,6 @@ export const getCartItems = async (userId: string): CartServiceResult => {
 };
 
 export const addProductToCart = async (productId: string, userId: string): CartServiceResult => {
-  // Find the active cart
-  // check if item exists in the cart
-  // -- if item exists, increment quantity by 1
-  // -- else create a new cart item
-
   return await sequelize.transaction(async (transaction) => {
     let cart = await Cart.findOne({
       where: {
