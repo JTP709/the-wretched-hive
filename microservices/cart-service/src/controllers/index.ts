@@ -125,8 +125,10 @@ export const put_cart_items = async (req: Request, res: Response) => {
  * across all cart items.
  */
 export const get_cart_total = async (req: Request, res: Response) => {
+  const userId = req.headers['x-user-id'] as string;
+
   try {
-    const { data } = await calculateCartTotal((req as AuthRequest).userId);
+    const { data } = await calculateCartTotal(userId);
 
     // If there are no cart items, result.total might be null.
     res.json({ total: data?.total });

@@ -1,4 +1,3 @@
-import { Op } from "sequelize";
 import sequelize, { Cart, CartItem, CartStatus } from "../models";
 
 export enum CartItemActionType {
@@ -10,7 +9,7 @@ export enum CartItemActionType {
 }
 
 interface GetCartResult extends Cart {
-  items: CartItem[]
+  items?: CartItem[]
 }
 
 type CartServiceResult = Promise<{
@@ -19,7 +18,7 @@ type CartServiceResult = Promise<{
   data?: any //Cart | CartItem | null,
 }>
 
-export const getCartItems = async (userId: string): CartServiceResult => {
+const selectCartAndItems = async (userId: string) => {
   const cart = await Cart.findOne({
     where: {
       userId,
@@ -32,44 +31,46 @@ export const getCartItems = async (userId: string): CartServiceResult => {
   }) as GetCartResult;
 
   if (!cart) {
-    await Cart.create({ userId });
+    return await Cart.create({ userId }) as GetCartResult;
   }
 
-  if (cart?.items) {
-    const products = await Promise.all(
-      cart.items.map(async (item) => {
-        const result = await fetch(`http://localhost:4000/api/products/${item.productId}`);
-        if (!result.ok) {
-          console.log(
-            `Could not fetch product details for ${item.productId}`,
-            { userId, result, cartId: cart.dataValues.id }
-          );
-          return {}
-        }
+  return cart;
+};
 
-        const product = await result.json();
+const fetchProductInfo = async (cart: GetCartResult, userId: string) => {
+  if (!cart?.items) return [];
 
-        return {
-          id: item.id,
-          quantity: item.quantity,
-          product,
-        };
-      })
-    );
+  return await Promise.all(
+    cart.items.map(async (item) => {
+      const result = await fetch(`http://localhost:4000/api/products/${item.productId}`);
+      if (!result.ok) {
+        console.log(
+          `Could not fetch product details for ${item.productId}`,
+          { userId, result, cartId: cart.dataValues.id }
+        );
+        return {}
+      }
 
-    const data = products.filter(product => Object.keys(product).length > 0);
+      const product = await result.json();
 
-    return {
-      type: CartItemActionType.SUCCESS,
-      data,
-    }
-  }
+      return {
+        id: item.id,
+        quantity: item.quantity,
+        product,
+      };
+    })
+  );
+}
+
+export const getCartItems = async (userId: string): CartServiceResult => {
+  const cart = await selectCartAndItems(userId);
+  const products = await fetchProductInfo(cart, userId);    
+  const data = products.filter(product => Object.keys(product).length > 0);
 
   return {
     type: CartItemActionType.SUCCESS,
-    data: [],
+    data,
   }
-
 };
 
 export const addProductToCart = async (productId: string, userId: string): CartServiceResult => {
@@ -117,16 +118,7 @@ export const addProductToCart = async (productId: string, userId: string): CartS
 };
 
 export const removeProductFromCart = async (id: string, userId: string): CartServiceResult => {
-  let cart = await Cart.findOne({
-    where: {
-      userId,
-      status: CartStatus.ACTIVE
-    }
-  });
-
-  if (!cart) {
-    cart = await Cart.create({ userId });
-  }
+  const cart = await selectCartAndItems(userId);
 
   const deleted = await CartItem.destroy({
     where: { id, cartId: cart.id },
@@ -171,39 +163,18 @@ export const updateCartItemQuantity = async (id: string, userId: string, quantit
 };
 
 export const calculateCartTotal = async (userId: string) => {
-//   const result = await CartItem.findOne({
-//     attributes: [
-//       [
-//         // Calculate the total: SUM(cartItems.quantity * products.price)
-//         sequelize.fn(
-//           "SUM",
-//           sequelize.literal(`"CartItem"."quantity" * "Product"."price"`)
-//         ),
-//         "total"
-//       ]
-//     ],
-//     include: [
-//       {
-//         model: Product,
-//         as: "product",
-//         attributes: [] // no need to retrieve product fields
-//       }
-//     ],
-//     where: {
-//       userId: userId,
-//       orderId: {
-//         [Op.is]: null,
-//       }
-//     },
-//     raw: true
-//   });
+  const cart = await selectCartAndItems(userId);
+  const products = await fetchProductInfo(cart, userId);    
+  const total = products.reduce((accum, cartItem) => {
+    const quantity = cartItem.quantity ?? 1;
+    const price = cartItem.product.price;
+    const cost = quantity * price;
 
-//   return {
-//     type: CartItemActionType.SUCCESS,
-//     data: result as unknown as { total: number } || 0,
-//   }
-return {
-  type: CartItemActionType.SUCCESS,
-  data: { total: 0 },
-}
+    return accum + cost;
+  }, 0);
+
+  return {
+    type: CartItemActionType.SUCCESS,
+    data: { total },
+  }
 };
