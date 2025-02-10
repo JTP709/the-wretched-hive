@@ -1,30 +1,32 @@
+import "./types/global";
 import 'dotenv/config';
 import express from 'express';
-import cors from 'cors';
-import cartItemRoutes from './routes/cartItems';
-import productsRoutes from './routes/products';
-import checkoutRoutes from './routes/checkout';
-import authRoutes from './routes/auth';
-import usersRoutes from './routes/users';
-import healthRoutes from './routes/health';
-import sequelize from './model';
-import authentication from './middleware/authentication';
-import cookieParser from 'cookie-parser';
-import { csrfProtection } from './middleware/csrf';
+import sequelize from './models';
+// import cors from 'cors';
+import cartItemRoutes from './routes';
+// import productsRoutes from './routes/products';
+// import checkoutRoutes from './routes/checkout';
+// import authRoutes from './routes/auth';
+// import usersRoutes from './routes/users';
+// import healthRoutes from './routes/health';
+// import sequelize from './model';
+// import authentication from './middleware/authentication';
+// import cookieParser from 'cookie-parser';
+// import { csrfProtection } from './middleware/csrf';
 
 const PORT = process.env.PORT || 4001;
 
 const app = express();
 
-app.use(cors({
-  origin: 'http://localhost:3000',
-  credentials: true,
-}));
+// app.use(cors({
+//   origin: 'http://localhost:3000',
+//   credentials: true,
+// }));
 app.use(express.json());
-app.use(cookieParser());
-app.use(authentication);
-app.use(csrfProtection);
-app.use('/api/health', healthRoutes);
+// app.use(cookieParser());
+// app.use(authentication);
+// app.use(csrfProtection);
+// app.use('/api/health', healthRoutes);
 app.use('/api/cart', cartItemRoutes);
 
 (async function Main() {

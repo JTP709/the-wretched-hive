@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
-import cartItemRoutes from './routes/cartItems';
+// import cartItemRoutes from './routes/cartItems';
 import productsRoutes from './routes/products';
 import checkoutRoutes from './routes/checkout';
 import authRoutes from './routes/auth';
@@ -11,8 +11,16 @@ import sequelize from './model';
 import authentication from './middleware/authentication';
 import cookieParser from 'cookie-parser';
 import { csrfProtection } from './middleware/csrf';
+import { createProxyMiddleware } from 'http-proxy-middleware';
 
 const PORT = process.env.PORT || 4000;
+const CART_SERVICE_URL = 'http://localhost:4001/api/cart';
+
+const cartServiceProxy = createProxyMiddleware({
+  target: CART_SERVICE_URL,
+  changeOrigin: true,
+  // pathRewrite: { '^/api/cart': '/api/cart' }
+});
 
 const app = express();
 
@@ -23,11 +31,12 @@ app.use(cors({
 app.use(express.json());
 app.use(cookieParser());
 app.use(csrfProtection);
-app.use(authentication);
 app.use('/api/health', healthRoutes);
-app.use('/api/auth', authRoutes);
 app.use('/api/products', productsRoutes);
-app.use('/api/cart', cartItemRoutes);
+app.use('/api/auth', authRoutes);
+app.use(authentication);
+app.use('/api/cart', cartServiceProxy);
+// app.use('/api/cart', cartItemRoutes);
 app.use('/api/checkout', checkoutRoutes);
 app.use('/api/users', usersRoutes);
 

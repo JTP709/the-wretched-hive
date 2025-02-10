@@ -15,6 +15,7 @@ export const getCartTotal = async () => {
   }
 
   if (!totalResponse.ok) {
+    console.log('getCartTotal Error', totalResponse);
     redirect('/error');
   }
 
@@ -36,6 +37,7 @@ export const getCartItems = async () => {
   }
 
   if (!cartResponse.ok) {
+    console.log('getCartItems Error', cartResponse);
     redirect('/error');
   }
 

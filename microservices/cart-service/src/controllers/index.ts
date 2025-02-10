@@ -1,7 +1,12 @@
 import { Request, Response } from "express";
-import sequelize, { CartItem, Product } from "../model";
-import { AuthRequest } from "../types/global";
-import { Op } from "sequelize";
+import { CartItem } from "../models";
+import { addProductToCart, getCartItems, removeProductFromCart, updateCartItemQuantity } from "../services";
+import { handleErrors } from "../utils";
+import { calculateCartTotal, CartItemActionType } from "../services";
+
+interface AuthRequest extends Request {
+  userId: string;
+}
 
 /**
  * GET /cart-items
@@ -9,26 +14,11 @@ import { Op } from "sequelize";
  */
 export const get_cart_items = async (req: Request, res: Response) => {
   try {
-    const cartItems = await CartItem.findAll({
-      include: [
-        {
-          model: Product,
-          as: "product",
-          required: true,
-          attributes: ['name', 'price', 'image', 'category', 'description'],
-        },
-      ],
-      where: {
-        userId: (req as AuthRequest).userId,
-        orderId: {
-          [Op.is]: null,
-        }
-      }
-    });
-    res.json(cartItems);
+    const userId = (req as AuthRequest).userId || "1";
+    const { data } = await getCartItems(userId);
+    res.json(data);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Internal server error' });
+    handleErrors(res, err);
   }
 };
 
@@ -45,33 +35,21 @@ export const post_cart_items = async (req: Request, res: Response) => {
   }
   
   try {
-    const existingCartItem = await CartItem.findOne({
-      where: {
-        productId,
-        userId,
-        orderId: {
-          [Op.is]: null,
-        },
-      },
-    });
-
-    if (existingCartItem) {
-      existingCartItem.quantity += quantity;
-      await existingCartItem.save();
-      res.status(200).json({ productId, quantity: existingCartItem.quantity });
-      return;
+    const result = await addProductToCart(productId, userId, quantity);
+    const cartItem = result.data as CartItem;
+    switch(result.type) {
+      case CartItemActionType.CREATED:
+        res.status(201).json({ productId, quantity });
+        return;
+      case CartItemActionType.UPDATED:
+        res.status(200).json({ productId, quantity: cartItem.quantity})
+        return;
+      default:
+        res.status(500).json({ message: "Internal server error" });
+        return;
     }
-    
-    const cartItem = await CartItem.create({
-      productId,
-      userId,
-      quantity,
-    });
-    
-    res.status(201).json({ productId, quantity: cartItem.quantity });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Internal server error' });
+    handleErrors(res, err);
   }
 };
 
@@ -84,18 +62,20 @@ export const delete_cart_items = async (req: Request, res: Response) => {
   const userId = (req as AuthRequest).userId;
 
   try {
-    const deleted = await CartItem.destroy({
-      where: { id, userId },
-    });
-    
-    if (deleted) {
-      res.status(204).json({ id });
-    } else {
-      res.status(404).json({ error: 'Cart item not found' });
+    const { type, message } = await removeProductFromCart(id, userId);
+    switch(type) {
+      case CartItemActionType.DELETED:
+        res.status(204).json({ message });
+        return;
+      case CartItemActionType.NOT_FOUND:
+        res.status(404).json({ message });
+        return;
+      default:
+        res.status(500).json({ message: "Internal server error" });
+        return;
     }
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Internal server error' });
+    handleErrors(res, err);
   }
 };
 
@@ -109,39 +89,29 @@ export const put_cart_items = async (req: Request, res: Response) => {
   const { quantity } = req.body;
   const userId = (req as AuthRequest).userId;
 
-  if (quantity === undefined || quantity === null) {
+  if (quantity == null) {
     res.status(400).json({ error: 'Missing required fields' });
     return;
   }
 
   try {
-    if (quantity <= 0) {
-      // If the quantity is zero or negative, delete the cart item.
-      const deleted = await CartItem.destroy({ where: { id, userId } });
-
-      if (deleted) {
-        res.status(204).json({ id });
+    const { type, message } = await updateCartItemQuantity(id, userId, quantity);
+    switch(type) {
+      case CartItemActionType.DELETED:
+        res.status(204).json({ message });
         return;
-      } else {
-        res.status(404).json({ error: 'Cart item not found' });
+      case CartItemActionType.UPDATED:
+        res.status(200).json({ message });
         return;
-      }
-    } else {
-      // Otherwise, update the quantity.
-      const cartItem = await CartItem.findByPk(id);
-
-      if (!cartItem) {
-        res.status(404).json({ error: 'Cart item not found' });
+      case CartItemActionType.NOT_FOUND:
+        res.status(404).json({ message });
         return;
-      }
-
-      cartItem.quantity = quantity;
-      await cartItem.save();
-      res.json({ id, quantity });
+      default:
+        res.status(500).json({ message: "Internal server error" });
+        return;
     }
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Internal server error' });
+    handleErrors(res, err);
   }
 };
 
@@ -152,57 +122,11 @@ export const put_cart_items = async (req: Request, res: Response) => {
  */
 export const get_cart_total = async (req: Request, res: Response) => {
   try {
-    const result = await CartItem.findOne({
-      attributes: [
-        [
-          // Calculate the total: SUM(cartItems.quantity * products.price)
-          sequelize.fn(
-            "SUM",
-            sequelize.literal(`"CartItem"."quantity" * "Product"."price"`)
-          ),
-          "total"
-        ]
-      ],
-      include: [
-        {
-          model: Product,
-          as: "product",
-          attributes: [] // no need to retrieve product fields
-        }
-      ],
-      where: {
-        userId: (req as AuthRequest).userId,
-        orderId: {
-          [Op.is]: null,
-        }
-      },
-      raw: true
-    });
-
-    // asserting the type since this query does not return a CartItem
-    const totalResult = result as unknown as { total: number } || null;
+    const { data } = await calculateCartTotal((req as AuthRequest).userId);
 
     // If there are no cart items, result.total might be null.
-    res.json({ total: totalResult?.total || 0 });
+    res.json({ total: data?.total });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-};
-
-export const get_health = async (_: Request, res: Response) => {
-  try {
-    await sequelize.authenticate();
-    res.status(200).json({
-      status: "OK",
-      uptime: process.uptime(),
-      timestamp: new Date().toISOString(),
-    });
-  } catch (err) {
-    res.status(500).json({
-      status: "ERROR",
-      db: "disconnected",
-      timestamp: new Date().toISOString(),
-    });
+    handleErrors(res, err);
   }
 };
