@@ -3,9 +3,10 @@
 import { useGetHealthCheck } from "@/api/client/queries/health"
 
 export default function HealthCheck() {
-  const { isError, data } = useGetHealthCheck();
+  const { isError, isFetching, data } = useGetHealthCheck();
+  const hasIssue = isError || !data || data?.status !== 200;
 
-  return isError || !data || data?.status !== 200
+  return !isFetching && hasIssue
     ? (
       <div>
         <p>We are experiencing issues with our services at the moment.</p>

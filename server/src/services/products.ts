@@ -1,3 +1,4 @@
+import * as grpc from "@grpc/grpc-js";
 import { Op } from "sequelize";
 import { Product } from "../model";
 
@@ -61,4 +62,12 @@ export const getProduct = async (productId: string): ProductsServiceResult => {
     type: ProductsActionType.SUCCESS,
     data: product,
   }
+};
+
+export const getProductForRPC = async (call: grpc.ServerUnaryCall<any, any>, callback: grpc.sendUnaryData<any>) => {
+  const productId = call.request.productId;
+  const { data } = await getProduct(productId);
+  const product = (data as Product)?.dataValues;
+
+  callback(null, product);
 };

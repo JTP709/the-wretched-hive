@@ -1,5 +1,6 @@
+import client from "../grpc/productClient";
 import sequelize, { Cart, CartItem, CartStatus } from "../models";
-import { CartItemActionType, CartProducts, CartServiceResult, GetCartResult, Product } from "./types";
+import { CartItemActionType, CartProduct, CartServiceResult, GetCartResult, Product } from "./types";
 
 const selectCartAndItems = async (userId: string) => {
   const cart = await Cart.findOne({
@@ -20,32 +21,34 @@ const selectCartAndItems = async (userId: string) => {
   return cart;
 };
 
-const fetchProductInfo = async (cart: GetCartResult, userId: string): Promise<CartProducts[]> => {
+const fetchProductInfo = async (cart: GetCartResult, userId: string) => {
   if (!cart?.items) return [];
 
   const productDetails = await Promise.all(
-    cart.items.map(async (item) => {
-      const result = await fetch(`http://localhost:4000/api/products/${item.productId}`);
-      if (!result.ok) {
-        console.log(
-          `Could not fetch product details for ${item.productId}`,
-          { userId, result, cartId: cart.dataValues.id }
-        );
-        return {} as CartProducts;
-      }
+    cart.items.map(item => {
+      return new Promise<CartProduct>((resolve) => {
+        const productId = item.dataValues.productId;
+        client.GetProduct({ productId }, (err: Error, response: any) => {
+          if (err) {
+            console.error(
+              `Could not fetch product details for ${productId}`,
+              { userId, err, cartId: cart.dataValues.id },
+            );
+            return resolve({} as CartProduct)
+          }
 
-      const product: Product = await result.json();
-
-      return {
-        id: item.id,
-        quantity: item.quantity,
-        product,
-      } as CartProducts;
+          resolve({
+            id: item.id,
+            quantity: item.quantity,
+            product: response
+          } as CartProduct)
+        })
+      })
     })
   );
 
-  return productDetails.filter((product) => Object.keys(product).length > 0);
-}
+  return productDetails.filter(product => Object.keys(product).length > 0);
+};
 
 export const getCartItems = async (userId: string): CartServiceResult => {
   const cart = await selectCartAndItems(userId);

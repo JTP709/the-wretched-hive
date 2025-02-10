@@ -21,14 +21,14 @@ export interface Product {
   description: string;
 }
 
-export interface CartProducts {
+export interface CartProduct {
   id: number;
   quantity: number;
   product: Product;
 }
 
 export type Total = { total: number }
-export type Data = GetCartResult | CartProducts[] | Total | CartItem
+export type Data = GetCartResult | CartProduct[] | Total | CartItem
 
 export type CartServiceResult = Promise<{
   type: CartItemActionType,

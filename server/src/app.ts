@@ -1,7 +1,6 @@
 import 'dotenv/config';
-import express, { Request } from 'express';
+import express from 'express';
 import cors from 'cors';
-// import cartItemRoutes from './routes/cartItems';
 import productsRoutes from './routes/products';
 import checkoutRoutes from './routes/checkout';
 import authRoutes from './routes/auth';
@@ -13,6 +12,7 @@ import cookieParser from 'cookie-parser';
 import { csrfProtection } from './middleware/csrf';
 import { createProxyMiddleware, errorResponsePlugin, loggerPlugin, proxyEventsPlugin } from 'http-proxy-middleware';
 import { AuthRequest } from './types/global';
+import { main as gRpcServer } from "./grpc/server";
 
 const PORT = process.env.PORT || 4000;
 const CART_SERVICE_URL = 'http://127.0.0.1:4001/api/cart';
@@ -48,7 +48,6 @@ app.use('/api/health', healthRoutes);
 app.use('/api/products', productsRoutes);
 app.use('/api/auth', authRoutes);
 app.use(authentication);
-// app.use('/api/cart', cartItemRoutes);
 app.use('/api/checkout', checkoutRoutes);
 app.use('/api/users', usersRoutes);
 
@@ -68,6 +67,8 @@ app.use('/api/users', usersRoutes);
     app.listen(PORT, () => {
       console.log(`Server is running on port ${PORT}`);
     });
+
+    gRpcServer();
 
     process.on('exit', () => {
       sequelize.close()

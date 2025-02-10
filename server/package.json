@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "start": "NODE_ENV=production node dist/app.js",
-    "dev": "NODE_ENV=development nodemon --watch src --ext ts --exec ts-node src/app.ts",
+    "dev": "NODE_ENV=development nodemon --watch src --exec ts-node src/app.ts",
     "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -13,6 +13,8 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@grpc/grpc-js": "^1.12.6",
+    "@grpc/proto-loader": "^0.7.13",
     "bcryptjs": "^2.4.3",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
