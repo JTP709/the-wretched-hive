@@ -1,6 +1,6 @@
 import client from "../grpc/productClient";
 import sequelize, { Cart, CartItem, CartStatus } from "../models";
-import { CartItemActionType, CartProduct, CartServiceResult, GetCartResult, Product } from "./types";
+import { CartItemActionType, CartProduct, CartServiceResult, GetCartResult } from "./types";
 
 const selectCartAndItems = async (userId: string) => {
   const cart = await Cart.findOne({
@@ -99,7 +99,7 @@ export const addProductToCart = async (productId: string, userId: string): CartS
   });
 };
 
-export const removeProductFromCart = async (id: string, userId: string): CartServiceResult => {
+export const removeProductFromCart = async (id: number, userId: string): CartServiceResult => {
   const cart = await selectCartAndItems(userId);
 
   const deleted = await CartItem.destroy({
@@ -119,7 +119,7 @@ export const removeProductFromCart = async (id: string, userId: string): CartSer
   }
 };
 
-export const updateCartItemQuantity = async (id: string, userId: string, quantity: number): CartServiceResult => {
+export const updateCartItemQuantity = async (id: number, userId: string, quantity: number): CartServiceResult => {
   if (quantity <= 0) {
     // If the quantity is zero or negative, delete the cart item.
     return await removeProductFromCart(id, userId);
@@ -157,6 +157,6 @@ export const calculateCartTotal = async (userId: string) => {
 
   return {
     type: CartItemActionType.SUCCESS,
-    data: { total },
+    data: total,
   }
 };

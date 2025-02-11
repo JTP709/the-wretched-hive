@@ -1,0 +1,95 @@
+syntax = "proto3";
+
+package cart;
+
+// Enum matching your CartItemActionType
+enum CartItemActionType {
+  SUCCESS = 0;
+  CREATED = 1;
+  UPDATED = 2;
+  DELETED = 3;
+  NOT_FOUND = 4;
+}
+
+// Request messages for each RPC.
+message GetCartItemsRequest {
+  string userId = 1;
+}
+
+message AddCartItemRequest {
+  string userId = 1;
+  int32 productId = 2;
+}
+
+message UpdateCartItemRequest {
+  string userId = 1;
+  int32 cartItemId = 2;
+  int32 quantity = 3;
+}
+
+message RemoveCartItemRequest {
+  string userId = 1;
+  int32 cartItemId = 2;
+}
+
+message GetCartTotalRequest {
+  string userId = 1;
+}
+
+message Product {
+  int32 id = 1;
+  string name = 2;
+  double price = 3;
+  string category = 4;
+  string description = 5;
+  string image = 6;
+}
+
+message CartItem {
+  int32 id = 1;
+  int32 quantity = 2;
+  Product product = 3;
+}
+
+// Response for GetCartItems: returns a list of cart items.
+message GetCartItemsResponse {
+  CartItemActionType type = 1;
+  string message = 2; // optional message, if needed
+  repeated CartItem data = 3;
+}
+
+// Response for AddCartItem: returns a single cart item.
+message AddCartItemResponse {
+  CartItemActionType type = 1;
+  string message = 2;
+  CartItem data = 3;
+}
+
+// Response for UpdateCartItem: returns no data beyond type/message.
+message UpdateCartItemResponse {
+  CartItemActionType type = 1;
+  string message = 2;
+}
+
+// Response for RemoveCartItem: returns no data beyond type/message.
+message RemoveCartItemResponse {
+  CartItemActionType type = 1;
+  string message = 2;
+}
+
+// Response for GetCartTotal: returns a total value.
+message GetCartTotalResponse {
+  CartItemActionType type = 1;
+  string message = 2;
+  double data = 3;
+}
+
+
+// The Cart service definition.
+service CartService {
+  rpc GetCartItems(GetCartItemsRequest) returns (GetCartItemsResponse);
+  rpc AddCartItem(AddCartItemRequest) returns (AddCartItemResponse);
+  rpc UpdateCartItem(UpdateCartItemRequest) returns (UpdateCartItemResponse);
+  rpc RemoveCartItem(RemoveCartItemRequest) returns (RemoveCartItemResponse);
+  rpc GetCartTotal(GetCartTotalRequest) returns (GetCartTotalResponse);
+}

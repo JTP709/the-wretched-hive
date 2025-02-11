@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { generateCsrfToken } from '../utils/token';
 import { baseCsrfCookieOptions } from '../utils';
 
-export const csrfProtection = (req: Request, res: Response, next: NextFunction) => {
+const csrfProtection = (req: Request, res: Response, next: NextFunction) => {
   const csrfCookie = req.cookies['XSRF-TOKEN'];
   
   if (req.method === "GET" || req.method === "HEAD") {
@@ -21,3 +21,5 @@ export const csrfProtection = (req: Request, res: Response, next: NextFunction) 
 
   next();
 };
+
+export default csrfProtection;

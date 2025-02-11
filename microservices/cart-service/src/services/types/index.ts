@@ -1,11 +1,11 @@
 import { Cart, CartItem } from "../../models";
 
 export enum CartItemActionType {
-  SUCCESS = 'SUCCESS',
-  NOT_FOUND = 'NOT_FOUND',
-  UPDATED = 'UPDATED',
-  DELETED = 'DELETED',
-  CREATED = 'CREATED',
+  SUCCESS = 0,
+  CREATED = 1,
+  UPDATED = 2,
+  DELETED = 3,
+  NOT_FOUND = 4,
 }
 
 export interface GetCartResult extends Cart {

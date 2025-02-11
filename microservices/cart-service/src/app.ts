@@ -1,17 +1,20 @@
-import 'express-async-errors';
 import 'dotenv/config';
-import express from 'express';
+import path from 'path';
+import { loadPackageDefinition, Server, ServerCredentials } from '@grpc/grpc-js';
+import { loadSync } from '@grpc/proto-loader';
 import sequelize from './models';
-import cartItemRoutes from './routes';
-import { globalErrorHandler } from './middleware';
+import { addCartItemRPC, getCartItemsRPC, getCartTotalRPC, removeCartItemRPC, updateCartItemRPC } from './controllers';
 
-const PORT = process.env.PORT || 4001;
+const PROTO_PATH = path.join(__dirname, './grpc', 'cart.proto');
 
-const app = express();
-
-app.use(express.json());
-app.use('/api/cart', cartItemRoutes);
-app.use(globalErrorHandler);
+const packageDefinition = loadSync(PROTO_PATH, {
+  keepCase: true,
+  longs: String,
+  enums: String,
+  defaults: true,
+  oneofs: true,
+});
+const cartProto = loadPackageDefinition(packageDefinition).cart as any;
 
 (async function Main() {
   try {
@@ -26,14 +29,29 @@ app.use(globalErrorHandler);
       console.log('All models were synchronized successfully');
     }
 
-    app.listen(PORT, () => {
-      console.log(`Server is running on port ${PORT}`);
-    });
-
     process.on('exit', () => {
       sequelize.close()
         .then(() => console.log('Closed the database connection successfully'))
         .catch((err: Error) => console.error('Error closing the database connection', err));
+    });
+
+    const server = new Server();
+    server.addService(cartProto.CartService.service, {
+      GetCartItems: getCartItemsRPC,
+      AddCartItem: addCartItemRPC,
+      UpdateCartItem: updateCartItemRPC,
+      RemoveCartItem: removeCartItemRPC,
+      GetCartTotal: getCartTotalRPC,
+    });
+
+    const bindAddress = "0.0.0.0:50053";
+
+    server.bindAsync(bindAddress, ServerCredentials.createInsecure(), (err) => {
+      if (err) {
+        console.error("Failed to bind gRPC server:", err);
+        return;
+      }
+      console.log(`Cart gRPC server running at ${bindAddress}`);
     });
   } catch (err) {
     console.error('An error occurred while starting the application', err);

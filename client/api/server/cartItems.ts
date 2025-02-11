@@ -21,7 +21,7 @@ export const getCartTotal = async () => {
 
   const data = await totalResponse.json();
 
-  return data?.total || 0;
+  return data || 0;
 };
 
 export const getCartItems = async () => {

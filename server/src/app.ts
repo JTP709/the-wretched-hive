@@ -1,48 +1,20 @@
+import 'express-async-errors';
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 import productRoutes from "./routes/products";
+import cartRoutes from "./routes/cart";
 import checkoutRoutes from './routes/checkout';
 import authRoutes from './routes/auth';
 import usersRoutes from './routes/users';
 import healthRoutes from './routes/health';
-import sequelize from './model';
 import authentication from './middleware/authentication';
-import cookieParser from 'cookie-parser';
-import { csrfProtection } from './middleware/csrf';
-import { createProxyMiddleware, errorResponsePlugin, loggerPlugin, proxyEventsPlugin } from 'http-proxy-middleware';
-import { AuthRequest } from './types/global';
+import csrfProtection from './middleware/csrf';
+import errorHandler from './middleware/httpErrorHandler';
+import sequelize from './model';
 
 const PORT = process.env.PORT || 4000;
-const CART_SERVICE_URL = 'http://127.0.0.1:4001/api/cart';
-const PRODUCTS_SERVICE_URL = 'http://127.0.0.1:4002/api/product';
-
-const cartServiceProxy = createProxyMiddleware({
-  target: CART_SERVICE_URL,
-  changeOrigin: true,
-  on: {
-    proxyReq: (proxyReq, req) => {
-      const request = req as AuthRequest;
-      if (request.userId) {
-        proxyReq.setHeader('x-user-id', request.userId.toString())
-      }
-    },
-    error: (err, req, res, target) => {
-      console.log('>>> Proxy error: ', { err, req, res, target })
-    }
-  },
-  plugins: [proxyEventsPlugin, errorResponsePlugin, loggerPlugin],
-});
-const productServiceProxy = createProxyMiddleware({
-  target: PRODUCTS_SERVICE_URL,
-  changeOrigin: true,
-  on: {
-    error: (err, req, res, target) => {
-      console.log('>>> Proxy error: ', { err, req, res, target })
-    }
-  },
-  plugins: [proxyEventsPlugin, errorResponsePlugin, loggerPlugin],
-})
 
 const app = express();
 
@@ -51,15 +23,16 @@ app.use(cors({
   credentials: true,
 }));
 app.use(cookieParser());
-app.use('/api/cart', authentication, cartServiceProxy);
 app.use(express.json());
 app.use('/api/health', healthRoutes);
 app.use('/api/products', productRoutes);
 app.use(csrfProtection);
 app.use('/api/auth', authRoutes);
 app.use(authentication);
+app.use('/api/cart', cartRoutes);
 app.use('/api/checkout', checkoutRoutes);
 app.use('/api/users', usersRoutes);
+app.use(errorHandler);
 
 (async function Main() {
   try {
