@@ -1,7 +1,6 @@
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
-import productsRoutes from './routes/products';
 import checkoutRoutes from './routes/checkout';
 import authRoutes from './routes/auth';
 import usersRoutes from './routes/users';
@@ -16,6 +15,7 @@ import { main as gRpcServer } from "./grpc/server";
 
 const PORT = process.env.PORT || 4000;
 const CART_SERVICE_URL = 'http://127.0.0.1:4001/api/cart';
+const PRODUCTS_SERVICE_URL = 'http://127.0.0.1:4002/api/product';
 
 const cartServiceProxy = createProxyMiddleware({
   target: CART_SERVICE_URL,
@@ -31,8 +31,18 @@ const cartServiceProxy = createProxyMiddleware({
       console.log('>>> Proxy error: ', { err, req, res, target })
     }
   },
-  plugins: [proxyEventsPlugin, errorResponsePlugin, loggerPlugin]
+  plugins: [proxyEventsPlugin, errorResponsePlugin, loggerPlugin],
 });
+const productServiceProxy = createProxyMiddleware({
+  target: PRODUCTS_SERVICE_URL,
+  changeOrigin: true,
+  on: {
+    error: (err, req, res, target) => {
+      console.log('>>> Proxy error: ', { err, req, res, target })
+    }
+  },
+  plugins: [proxyEventsPlugin, errorResponsePlugin, loggerPlugin],
+})
 
 const app = express();
 
@@ -41,11 +51,11 @@ app.use(cors({
   credentials: true,
 }));
 app.use(cookieParser());
+app.use('/api/products', productServiceProxy);
 app.use('/api/cart', authentication, cartServiceProxy);
 app.use(express.json());
-app.use(csrfProtection);
 app.use('/api/health', healthRoutes);
-app.use('/api/products', productsRoutes);
+app.use(csrfProtection);
 app.use('/api/auth', authRoutes);
 app.use(authentication);
 app.use('/api/checkout', checkoutRoutes);
