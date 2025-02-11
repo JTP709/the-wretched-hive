@@ -1,4 +1,3 @@
-import * as grpc from "@grpc/grpc-js";
 import { Op } from "sequelize";
 import { Product } from "../models";
 
