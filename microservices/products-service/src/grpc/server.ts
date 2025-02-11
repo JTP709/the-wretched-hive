@@ -1,7 +1,7 @@
 import * as grpc from "@grpc/grpc-js";
 import * as protoLoader from "@grpc/proto-loader";
 import path from 'path';
-import { getProductForRPC } from "../services";
+import { get_product_rpc, get_products_rpc } from "../controllers";
 
 const PROTO_PATH = path.join(__dirname, 'product.proto');
 
@@ -17,7 +17,10 @@ const productProto = grpc.loadPackageDefinition(packageDefinition).products as a
 
 export const main = () => {
   const server = new grpc.Server();
-  server.addService(productProto.ProductService.service, { GetProduct: getProductForRPC });
+  server.addService(productProto.ProductService.service, { 
+    GetProduct: get_product_rpc,
+    GetProducts: get_products_rpc,
+  });
 
   const bindAddress = '0.0.0.0:50052';
   server.bindAsync(bindAddress, grpc.ServerCredentials.createInsecure(), (err) => {
@@ -27,5 +30,5 @@ export const main = () => {
     }
 
     console.log(`gRPC server running at ${bindAddress}`);
-  })
+  });
 };

@@ -38,6 +38,12 @@ export const getPaginatedProducts = async (searchQuery: string | null, limit: nu
 
   const totalPages = Math.ceil(total / limit);
 
+  if (products.length === 0) {
+    return {
+      type: ProductsActionType.NOT_FOUND,
+    }
+  }
+
   return {
     type: ProductsActionType.SUCCESS,
     data: {
@@ -70,4 +76,34 @@ export const getProductForRPC = async (call: grpc.ServerUnaryCall<any, any>, cal
   const product = (data as Product)?.dataValues;
 
   callback(null, product);
+};
+
+export const getProductsForRPC = async (
+  call: grpc.ServerUnaryCall<any, any>,
+  callback: grpc.sendUnaryData<any>,
+) => {
+  const { page, limit, searchQuery } = call.request;
+
+  try {
+    const result = await getPaginatedProducts(searchQuery, limit, page);
+    switch(result.type) {
+      case ProductsActionType.SUCCESS:
+        const { total, totalPages, products } = result.data as PaginatedProductsResponse;
+        const protoProducts = products.map((product: Product) => ({
+          id: product.id,
+          name: product.name,
+          price: product.price,
+          category: product.category,
+          description: product.description,
+          image: product.image,
+        }));
+        callback(null, { total, totalPages, products: protoProducts });
+      case ProductsActionType.NOT_FOUND:
+        callback(null, { total: 0, totalPages: 0, products: [] });
+      default:
+        callback({ code: grpc.status.INTERNAL, message: 'Internal server error '});
+    }
+  } catch (err: any) {
+    callback({ code: grpc.status.INTERNAL, message: err?.message });
+  }
 };

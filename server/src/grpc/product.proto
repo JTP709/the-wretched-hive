@@ -17,7 +17,22 @@ message ProductResponse {
   string image = 6;
 }
 
+// Request message for fetching a paginated list of products
+message GetProductsRequest {
+  int32 page = 1;
+  int32 limit = 2;
+  string searchQuery = 3; // optional
+}
+
+// Response message containing paginated product details
+message PaginatedProductsResponse {
+  int32 total = 1;
+  int32 totalPages = 2;
+  repeated ProductResponse products = 3;
+}
+
 // The Product service definition
 service ProductService {
   rpc GetProduct(ProductRequest) returns (ProductResponse);
+  rpc GetProducts(GetProductsRequest) returns (PaginatedProductsResponse);
 }

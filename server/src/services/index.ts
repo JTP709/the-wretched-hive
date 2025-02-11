@@ -7,20 +7,9 @@ import {
   resetUserPassword,
 } from "./auth";
 import {
-  getCartItems,
-  addProductToCart,
-  removeProductFromCart,
-  updateCartItemQuantity,
-  calculateCartTotal,
-} from "./cartItems";
-import {
   getOrderTotal,
   createOrder,
 } from "./checkout";
-import {
-  getPaginatedProducts,
-  getProduct,
-} from "./products";
 import {
   getUser
 } from "./users"
@@ -32,14 +21,7 @@ export {
   refreshAuthToken,
   requestResetPasswordEmail,
   resetUserPassword,
-  getCartItems,
-  addProductToCart,
-  removeProductFromCart,
-  updateCartItemQuantity,
-  calculateCartTotal,
   getOrderTotal,
   createOrder,
-  getPaginatedProducts,
-  getProduct,
   getUser,
 };

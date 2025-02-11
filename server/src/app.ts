@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
+import productRoutes from "./routes/products";
 import checkoutRoutes from './routes/checkout';
 import authRoutes from './routes/auth';
 import usersRoutes from './routes/users';
@@ -11,7 +12,6 @@ import cookieParser from 'cookie-parser';
 import { csrfProtection } from './middleware/csrf';
 import { createProxyMiddleware, errorResponsePlugin, loggerPlugin, proxyEventsPlugin } from 'http-proxy-middleware';
 import { AuthRequest } from './types/global';
-import { main as gRpcServer } from "./grpc/server";
 
 const PORT = process.env.PORT || 4000;
 const CART_SERVICE_URL = 'http://127.0.0.1:4001/api/cart';
@@ -21,7 +21,7 @@ const cartServiceProxy = createProxyMiddleware({
   target: CART_SERVICE_URL,
   changeOrigin: true,
   on: {
-    proxyReq: (proxyReq, req, res) => {
+    proxyReq: (proxyReq, req) => {
       const request = req as AuthRequest;
       if (request.userId) {
         proxyReq.setHeader('x-user-id', request.userId.toString())
@@ -51,10 +51,10 @@ app.use(cors({
   credentials: true,
 }));
 app.use(cookieParser());
-app.use('/api/products', productServiceProxy);
 app.use('/api/cart', authentication, cartServiceProxy);
 app.use(express.json());
 app.use('/api/health', healthRoutes);
+app.use('/api/products', productRoutes);
 app.use(csrfProtection);
 app.use('/api/auth', authRoutes);
 app.use(authentication);
@@ -77,8 +77,6 @@ app.use('/api/users', usersRoutes);
     app.listen(PORT, () => {
       console.log(`Server is running on port ${PORT}`);
     });
-
-    gRpcServer();
 
     process.on('exit', () => {
       sequelize.close()
