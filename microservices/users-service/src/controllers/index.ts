@@ -1,5 +1,5 @@
 import { sendUnaryData, ServerUnaryCall, status } from "@grpc/grpc-js";
-import { createNewUser } from "../services";
+import { authenticateUser, createNewUser } from "../services";
 
 enum UsersActionType {
   SUCCESS = "SUCCESS",
@@ -9,7 +9,7 @@ enum UsersActionType {
   CONFLICT = "CONFLICT",
 }
 
-export const get_user = (
+export const get_user = async (
   call: ServerUnaryCall<any, any>,
   callback: sendUnaryData<any>
 ) => {
@@ -84,35 +84,52 @@ export const post_signup = async (
     });
 };
 
-export const post_login = (
+export const post_login = async (
+  call: ServerUnaryCall<any, any>,
+  callback: sendUnaryData<any>
+) => {
+  const { username, password } = call.request;
+  if (!username || !password) {
+    callback(null, {
+      type: UsersActionType.BAD_REQUEST,
+      message: "Username and password are required",
+    });
+  }
+  const { accessToken, refreshToken } = await authenticateUser(
+    username,
+    password
+  );
+  callback(null, {
+    type: UsersActionType.SUCCESS,
+    data: {
+      accessToken,
+      refreshToken,
+    },
+  });
+};
+
+export const post_logout = async (
   call: ServerUnaryCall<any, any>,
   callback: sendUnaryData<any>
 ) => {
   callback(null, { name: "Jon Prell" });
 };
 
-export const post_logout = (
+export const post_refresh_token = async (
   call: ServerUnaryCall<any, any>,
   callback: sendUnaryData<any>
 ) => {
   callback(null, { name: "Jon Prell" });
 };
 
-export const post_refresh_token = (
+export const post_forgot_password = async (
   call: ServerUnaryCall<any, any>,
   callback: sendUnaryData<any>
 ) => {
   callback(null, { name: "Jon Prell" });
 };
 
-export const post_forgot_password = (
-  call: ServerUnaryCall<any, any>,
-  callback: sendUnaryData<any>
-) => {
-  callback(null, { name: "Jon Prell" });
-};
-
-export const post_reset_password = (
+export const post_reset_password = async (
   call: ServerUnaryCall<any, any>,
   callback: sendUnaryData<any>
 ) => {
