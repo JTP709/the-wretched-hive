@@ -204,7 +204,7 @@ export const checkoutCart = async (orderInfo: OrderInfo) => {
   cart.status = CartStatus.ORDERED;
   await cart.save();
   await createNewCart(userId);
-  await publishOrderMessage(orderInfo);
+  await publishOrderMessage({...orderInfo, cartId: cart.id});
   
   return {
     type: CartItemActionType.CREATED,

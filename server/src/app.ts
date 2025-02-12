@@ -32,6 +32,17 @@ app.use('/api/cart', cartRoutes);
 app.use('/api/users', usersRoutes);
 app.use(errorHandler);
 
+const onShutdown = async () => {
+  try {
+    await sequelize.close();
+    console.log('Closed the database connection successfully');
+  } catch (err) {
+    console.error('Error closing the database connection', err);
+  } finally {
+    process.exit();
+  }
+};
+
 (async function Main() {
   try {
     await sequelize.authenticate();
@@ -49,11 +60,8 @@ app.use(errorHandler);
       console.log(`Server is running on port ${PORT}`);
     });
 
-    process.on('exit', () => {
-      sequelize.close()
-        .then(() => console.log('Closed the database connection successfully'))
-        .catch((err) => console.error('Error closing the database connection', err));
-    });
+    process.on('SIGINT', onShutdown);
+    process.on('SIGTERM', onShutdown);
   } catch (err) {
     console.error('An error occurred while starting the application', err);
   }

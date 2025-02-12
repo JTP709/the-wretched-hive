@@ -16,6 +16,17 @@ const packageDefinition = loadSync(PROTO_PATH, {
 });
 const cartProto = loadPackageDefinition(packageDefinition).cart as any;
 
+const onShutdown = async () => {
+  try {
+    await sequelize.close();
+    console.log('Closed the database connection successfully');
+  } catch (err) {
+    console.error('Error closing the database connection', err);
+  } finally {
+    process.exit();
+  }
+};
+
 (async function Main() {
   try {
     await sequelize.authenticate();
@@ -29,11 +40,8 @@ const cartProto = loadPackageDefinition(packageDefinition).cart as any;
       console.log('All models were synchronized successfully');
     }
 
-    process.on('exit', () => {
-      sequelize.close()
-        .then(() => console.log('Closed the database connection successfully'))
-        .catch((err: Error) => console.error('Error closing the database connection', err));
-    });
+    process.on('SIGINT', onShutdown);
+    process.on('SIGTERM', onShutdown);
 
     const server = new Server();
     server.addService(cartProto.CartService.service, {

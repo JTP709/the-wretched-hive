@@ -1,4 +1,4 @@
-type OrderInfo = {
+interface OrderInfo {
   name: string;
   email: string;
   streetAddress: string;
@@ -9,4 +9,8 @@ type OrderInfo = {
   phone: string;
   total: number;
   userId: string;
+}
+
+interface PublishOrderInfo extends OrderInfo {
+  cartId: number;
 }
