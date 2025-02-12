@@ -2,6 +2,14 @@ syntax = "proto3";
 
 package users;
 
+enum ActionType {
+  SUCCESS = 1;
+  CREATED = 2;
+  NOT_FOUND = 3;
+  BAD_REQUEST = 4;
+  CONFLICT = 5;
+}
+
 message GetUserRequest {
   string userId = 1;
 }
@@ -10,6 +18,25 @@ message GetUserResponse {
   string name = 1;
 }
 
+message PostSignUpRequest {
+  string username = 1;
+  string password = 2;
+  string email = 3;
+  string firstName = 4;
+  string lastName = 5;
+  string streetAddress = 6;
+  string streetAddressTwo = 7;
+  string city = 8;
+  string planet = 9;
+  string postalCode = 10;
+}
+
+message PostSignUpResponse {
+  ActionType type = 1;
+  string message = 2;
+}
+
 service UsersService {
   rpc GetUser(GetUserRequest) returns (GetUserResponse);
+  rpc PostSignUp(PostSignUpRequest) returns (PostSignUpResponse);
 }
