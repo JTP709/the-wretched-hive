@@ -7,7 +7,7 @@ import {
 } from "@grpc/grpc-js";
 import { loadSync } from "@grpc/proto-loader";
 import sequelize from "./models";
-import { get_user, post_signup } from "./controllers";
+import { get_user, post_login, post_signup } from "./controllers";
 
 const PROTO_PATH = path.join(__dirname, "./grpc", "users.proto");
 
@@ -51,6 +51,7 @@ const onShutdown = async () => {
     server.addService(usersProto.UsersService.service, {
       GetUser: get_user,
       PostSignUp: post_signup,
+      PostLogin: post_login,
     });
 
     const bindAddress = "0.0.0.0:50054";
