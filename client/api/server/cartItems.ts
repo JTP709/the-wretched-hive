@@ -10,7 +10,7 @@ export const getCartTotal = async () => {
     credentials: 'include',
   });
   
-  if (totalResponse.status === 401 || totalResponse.status === 403) {
+  if (totalResponse.status === 403) {
     redirect('/login');
   }
 
@@ -32,7 +32,7 @@ export const getCartItems = async () => {
     credentials: 'include',
   });
   
-  if (cartResponse.status === 401 || cartResponse.status === 403) {
+  if (cartResponse.status === 403) {
     redirect('/login');
   }
 

@@ -1,13 +1,7 @@
-import { Request } from "express";
-
 type User = {
   id: number,
   username: string,
   password: string,
-}
-
-interface AuthRequest extends Request {
-  userId: string;
 }
 
 interface NewUserInfo {
@@ -21,4 +15,16 @@ interface NewUserInfo {
   city: string;
   planet: string;
   postalCode: string;
+}
+
+type OrderInfo = {
+  name: string;
+  email: string;
+  streetAddress: string;
+  streetAddressTwo: string;
+  city: string;
+  planet: string;
+  postalCode: string;
+  phone: string;
+  userId: string;
 }

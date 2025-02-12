@@ -2,7 +2,6 @@ import { Request, Response } from 'express';
 import { handleErrors } from '../utils';
 import { baseTokenCookieOptions } from '../utils/cookieOptions';
 import { authenticateUser, createNewUser, refreshAuthToken, requestResetPasswordEmail, resetUserPassword, revokeRefreshToken } from '../services';
-import { NewUserInfo } from '../types/global';
 
 export const signup = async (req: Request, res: Response) => {
   const {

@@ -5,6 +5,7 @@ import {
   delete_cart_items,
   put_cart_items,
   get_cart_total,
+  checkout_cart,
 } from '../controllers/cart';
 
 const router = express.Router();
@@ -14,5 +15,6 @@ router.post('/', post_cart_items);
 router.put('/:id', put_cart_items);
 router.delete('/:id', delete_cart_items);
 router.get('/total', get_cart_total);
+router.post('/checkout', checkout_cart);
 
 export default router;

@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import jwt, { JwtPayload } from 'jsonwebtoken';
-import { AuthRequest } from '../types/global';
+import { AuthRequest } from '../types';
 import { ACCESS_TOKEN_SECRET } from '../utils';
 
 const authentication = (req: Request, res: Response, next: NextFunction) => {

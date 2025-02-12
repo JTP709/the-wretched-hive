@@ -51,45 +51,58 @@ message CartItem {
   Product product = 3;
 }
 
-// Response for GetCartItems: returns a list of cart items.
+message CheckoutCartRequest {
+  string userId = 1;
+  int32 cartId = 2;
+  string name = 3;
+  string email = 4;
+  string streetAddress = 5;
+  string streetAddressTwo = 6;
+  string city = 7;
+  string planet = 8;
+  string postalCode = 9;
+  string phone = 10;
+}
+
 message GetCartItemsResponse {
   CartItemActionType type = 1;
-  string message = 2; // optional message, if needed
+  string message = 2;
   repeated CartItem data = 3;
 }
 
-// Response for AddCartItem: returns a single cart item.
 message AddCartItemResponse {
   CartItemActionType type = 1;
   string message = 2;
   CartItem data = 3;
 }
 
-// Response for UpdateCartItem: returns no data beyond type/message.
 message UpdateCartItemResponse {
   CartItemActionType type = 1;
   string message = 2;
 }
 
-// Response for RemoveCartItem: returns no data beyond type/message.
 message RemoveCartItemResponse {
   CartItemActionType type = 1;
   string message = 2;
 }
 
-// Response for GetCartTotal: returns a total value.
 message GetCartTotalResponse {
   CartItemActionType type = 1;
   string message = 2;
   double data = 3;
 }
 
+message CheckoutCartResponse {
+  CartItemActionType type = 1;
+  string message = 2;
+}
 
-// The Cart service definition.
+
 service CartService {
   rpc GetCartItems(GetCartItemsRequest) returns (GetCartItemsResponse);
   rpc AddCartItem(AddCartItemRequest) returns (AddCartItemResponse);
   rpc UpdateCartItem(UpdateCartItemRequest) returns (UpdateCartItemResponse);
   rpc RemoveCartItem(RemoveCartItemRequest) returns (RemoveCartItemResponse);
   rpc GetCartTotal(GetCartTotalRequest) returns (GetCartTotalResponse);
+  rpc CheckoutCart(CheckoutCartRequest) returns (CheckoutCartResponse);
 }

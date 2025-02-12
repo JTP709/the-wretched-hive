@@ -7,10 +7,6 @@ import {
   resetUserPassword,
 } from "./auth";
 import {
-  getOrderTotal,
-  createOrder,
-} from "./checkout";
-import {
   getUser
 } from "./users"
 
@@ -21,7 +17,5 @@ export {
   refreshAuthToken,
   requestResetPasswordEmail,
   resetUserPassword,
-  getOrderTotal,
-  createOrder,
   getUser,
 };

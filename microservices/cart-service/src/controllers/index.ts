@@ -5,9 +5,10 @@ import {
   removeProductFromCart,
   updateCartItemQuantity,
   calculateCartTotal,
+  checkoutCart,
 } from "../services";
 
-export const getCartItemsRPC = async (
+export const get_cart_items = async (
   call: ServerUnaryCall<any, any>,
   callback: sendUnaryData<any>,
 ) => {
@@ -16,11 +17,12 @@ export const getCartItemsRPC = async (
     const { type, data } = await getCartItems(userId);
     callback(null, { type, data, message: "" });
   } catch (err: any) {
-    callback({ code: status.INTERNAL, message: err?.message });
+    console.error(err);
+    callback({ code: status.INTERNAL, message: "Internal server error" });
   }
 };
 
-export const addCartItemRPC = async (
+export const add_cart_item = async (
   call: ServerUnaryCall<any, any>,
   callback: sendUnaryData<any>,
 ) => {
@@ -29,11 +31,12 @@ export const addCartItemRPC = async (
     const { type, data } = await addProductToCart(productId, userId);
     callback(null, { type, data });
   } catch (err: any) {
-    callback({ code: status.INTERNAL, message: err?.message });
+    console.error(err);
+    callback({ code: status.INTERNAL, message: "Internal server error" });
   }
 };
 
-export const updateCartItemRPC = async (
+export const update_cart_item = async (
   call: ServerUnaryCall<any, any>,
   callback: sendUnaryData<any>,
 ) => {
@@ -42,11 +45,12 @@ export const updateCartItemRPC = async (
     const { type, message } = await updateCartItemQuantity(cartItemId, userId, quantity);
     callback(null, { type, message });
   } catch (err: any) {
-    callback({ code: status.INTERNAL, message: err?.message });
+    console.error(err);
+    callback({ code: status.INTERNAL, message: "Internal server error" });
   }
 };
 
-export const removeCartItemRPC = async (
+export const remove_cart_item = async (
   call: ServerUnaryCall<any, any>,
   callback: sendUnaryData<any>,
 ) => {
@@ -55,11 +59,12 @@ export const removeCartItemRPC = async (
     const { type, message } = await removeProductFromCart(cartItemId, userId);
     callback(null, { type, message });
   } catch (err: any) {
-    callback({ code: status.INTERNAL, message: err?.message });
+    console.error(err);
+    callback({ code: status.INTERNAL, message: "Internal server error" });
   }
 };
 
-export const getCartTotalRPC = async (
+export const get_cart_total = async (
   call: ServerUnaryCall<any, any>,
   callback: sendUnaryData<any>,
 ) => {
@@ -68,6 +73,43 @@ export const getCartTotalRPC = async (
     const { type, data } = await calculateCartTotal(userId);
     callback(null, { type, data, message: "" });
   } catch (err: any) {
-    callback({ code: status.INTERNAL, message: err?.message });
+    console.error(err);
+    callback({ code: status.INTERNAL, message: "Internal server error" });
+  }
+};
+
+export const checkout_cart = async (
+  call: ServerUnaryCall<any, any>,
+  callback: sendUnaryData<any>,
+) => {
+  try {
+    const {
+      name,
+      email,
+      streetAddress,
+      streetAddressTwo,
+      city,
+      planet,
+      postalCode,
+      phone,
+      total,
+      userId,
+    } = call.request;
+    const { type, message } = await checkoutCart({
+      name,
+      email,
+      streetAddress,
+      streetAddressTwo,
+      city,
+      planet,
+      postalCode,
+      phone,
+      total,
+      userId,
+    });
+    callback(null, { type, message });
+  } catch (err: any) {
+    console.error(err);
+    callback({ code: status.INTERNAL, message: "Internal server error" });
   }
 };

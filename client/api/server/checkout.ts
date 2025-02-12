@@ -10,7 +10,7 @@ export const getCheckoutTotal = async (orderId: string) => {
     credentials: 'include',
   });
   
-  if (totalResponse.status === 401 || totalResponse.status === 403) {
+  if (totalResponse.status === 403) {
     redirect('/login');
   }
 

@@ -30,13 +30,13 @@ export default function CheckoutForm({ total }: CheckoutFormProps) {
 
     const checkoutResponse = await checkout(formDataJSON);
 
-    if (checkoutResponse.status === 401 || checkoutResponse.status === 403) {
+    if (checkoutResponse.status === 403) {
       router.push("/login");
     } else if (!checkoutResponse.ok) {
-      alert('There was an issue while trying to complete your purchase.');
+      const response = await checkoutResponse.json();
+      alert(response?.message || 'There was an issue while trying to complete your purchase.');
     } else {
-      const data = await checkoutResponse.json();
-      router.push(`/confirmation?orderId=${data.id}`);
+      router.push(`/confirmation?total=${total}`);
     }
   };
 
@@ -46,19 +46,35 @@ export default function CheckoutForm({ total }: CheckoutFormProps) {
       onSubmit={handleSubmit}
     >
       <label className="flex flex-col mb-4">
-        Name
+        Name:
         <input className="text-black" required type="text" name="name"></input>
       </label>
       <label className="flex flex-col mb-4">
-        Email
+        Email:
         <input className="text-black" required type="text" name="email"></input>
       </label>
       <label className="flex flex-col mb-4">
-        Address
-        <input className="text-black" required type="text" name="address"></input>
+        Street Address:
+        <input className="text-black" required type="text" name="streetAddress"></input>
       </label>
       <label className="flex flex-col mb-4">
-        Phone Number
+        Street Address Line Two {'(optional)'}:
+        <input className="text-black" type="text" name="streetAddressTwo"></input>
+      </label>
+      <label className="flex flex-col mb-4">
+        City:
+        <input className="text-black" required type="text" name="city"></input>
+      </label>
+      <label className="flex flex-col mb-4">
+        Planet:
+        <input className="text-black" required type="text" name="planet"></input>
+      </label>
+      <label className="flex flex-col mb-4">
+        Postal Code:
+        <input className="text-black" required type="text" name="postalCode"></input>
+      </label>
+      <label className="flex flex-col mb-4">
+        Commlink Number:
         <input className="text-black" required type="text" name="phone"></input>
       </label>
       <button 

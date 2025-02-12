@@ -5,13 +5,12 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import productRoutes from "./routes/products";
 import cartRoutes from "./routes/cart";
-import checkoutRoutes from './routes/checkout';
 import authRoutes from './routes/auth';
 import usersRoutes from './routes/users';
 import healthRoutes from './routes/health';
 import authentication from './middleware/authentication';
 import csrfProtection from './middleware/csrf';
-import errorHandler from './middleware/httpErrorHandler';
+import errorHandler from './middleware/errorHandler';
 import sequelize from './model';
 
 const PORT = process.env.PORT || 4000;
@@ -30,7 +29,6 @@ app.use(csrfProtection);
 app.use('/api/auth', authRoutes);
 app.use(authentication);
 app.use('/api/cart', cartRoutes);
-app.use('/api/checkout', checkoutRoutes);
 app.use('/api/users', usersRoutes);
 app.use(errorHandler);
 

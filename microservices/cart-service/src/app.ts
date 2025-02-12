@@ -3,7 +3,7 @@ import path from 'path';
 import { loadPackageDefinition, Server, ServerCredentials } from '@grpc/grpc-js';
 import { loadSync } from '@grpc/proto-loader';
 import sequelize from './models';
-import { addCartItemRPC, getCartItemsRPC, getCartTotalRPC, removeCartItemRPC, updateCartItemRPC } from './controllers';
+import { add_cart_item, checkout_cart, get_cart_items, get_cart_total, remove_cart_item, update_cart_item } from './controllers';
 
 const PROTO_PATH = path.join(__dirname, './grpc', 'cart.proto');
 
@@ -37,11 +37,12 @@ const cartProto = loadPackageDefinition(packageDefinition).cart as any;
 
     const server = new Server();
     server.addService(cartProto.CartService.service, {
-      GetCartItems: getCartItemsRPC,
-      AddCartItem: addCartItemRPC,
-      UpdateCartItem: updateCartItemRPC,
-      RemoveCartItem: removeCartItemRPC,
-      GetCartTotal: getCartTotalRPC,
+      GetCartItems: get_cart_items,
+      AddCartItem: add_cart_item,
+      UpdateCartItem: update_cart_item,
+      RemoveCartItem: remove_cart_item,
+      GetCartTotal: get_cart_total,
+      CheckoutCart: checkout_cart,
     });
 
     const bindAddress = "0.0.0.0:50053";

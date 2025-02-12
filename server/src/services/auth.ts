@@ -2,7 +2,6 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import { User } from "../model";
-import { NewUserInfo } from "../types/global";
 import { generateAccessToken, generateRefreshToken, REFRESH_TOKEN_SECRET, sendPasswordResetEmail } from "../utils";
 import { Op } from "sequelize";
 

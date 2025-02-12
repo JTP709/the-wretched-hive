@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import { AuthRequest } from "../types/global";
-import { addCartItem, getCartItems, getCartTotal, removeCartItem, updateCartItem } from "../grpc/cartClient";
+import { AuthRequest } from "../types";
+import { addCartItem, checkoutCart, getCartItems, getCartTotal, removeCartItem, updateCartItem } from "../grpc/cartClient";
 import { CartItemActionType } from "../types/enums";
 
 /**
@@ -36,6 +36,7 @@ export const post_cart_items = async (req: Request, res: Response) => {
       res.status(200).json({ productId, quantity: data.quantity})
       return;
     default:
+      console.log("Post cart items service did not return a known action type:", type);
       res.status(500).json({ message: "Internal server error" });
       return;
   }
@@ -58,6 +59,7 @@ export const delete_cart_items = async (req: Request, res: Response) => {
       res.status(404).json({ message });
       return;
     default:
+      console.log("Delete cart item service did not return a known action type:", type);
       res.status(500).json({ message: "Internal server error" });
       return;
   }
@@ -90,6 +92,7 @@ export const put_cart_items = async (req: Request, res: Response) => {
       res.status(404).json({ message });
       return;
     default:
+      console.log("Update cart item service did not return a known action type:", type);
       res.status(500).json({ message: "Internal server error" });
       return;
   }
@@ -105,4 +108,60 @@ export const get_cart_total = async (req: Request, res: Response) => {
   const { data } = await getCartTotal(userId);
 
   res.json(data);
+};
+
+/**
+ * POST /cart/checkout
+ * Submits an order for the items in the user's ACTIVE cart
+ */
+export const checkout_cart = async (req: Request, res: Response) => {
+  const userId = (req as AuthRequest).userId;
+  const {
+    name,
+    email,
+    streetAddress,
+    streetAddressTwo,
+    city,
+    planet,
+    postalCode,
+    phone,
+  } = req.body;
+
+  const missingFields = [];
+  if (!name) missingFields.push('name');
+  if (!email) missingFields.push('email');
+  if (!streetAddress) missingFields.push('streetAddress');
+  if (!streetAddressTwo) missingFields.push('streetAddressTwo');
+  if (!city) missingFields.push('city');
+  if (!planet) missingFields.push('planet');
+  if (!postalCode) missingFields.push('postalCode');
+  if (!phone) missingFields.push('phone');
+  if (missingFields.length) {
+    res.status(400).json({ message: `Missin required fields: ${missingFields.join(', ')}` });
+    return;
+  }
+
+  const { type, message } = await checkoutCart({
+    name,
+    email,
+    streetAddress,
+    streetAddressTwo,
+    city,
+    planet,
+    postalCode,
+    phone,
+    userId,
+  });
+  switch(type) {
+    case CartItemActionType.CREATED:
+      res.status(200).json({ message });
+      return;
+    case CartItemActionType.NOT_FOUND:
+      res.status(404).json({ message });
+      return;
+    default:
+      console.log("Checkout cart service did not return a known action type:", type);
+      res.status(500).json({ message: 'Internal server error' });
+      return;
+  }
 };

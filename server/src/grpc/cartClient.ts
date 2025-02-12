@@ -40,4 +40,8 @@ export const getCartTotal = (userId: string): Promise<any> => {
   return grpcPromise(client.GetCartTotal.bind(client), { userId });
 };
 
+export const checkoutCart = (orderInfo: OrderInfo): Promise<any> => {
+  return grpcPromise(client.CheckoutCart.bind(client), { ...orderInfo });
+};
+
 export default client;

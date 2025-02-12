@@ -1,6 +1,14 @@
 import client from "../grpc/productClient";
 import sequelize, { Cart, CartItem, CartStatus } from "../models";
+import { publishOrderMessage } from "../rabbitmq";
 import { CartItemActionType, CartProduct, CartServiceResult, GetCartResult } from "./types";
+
+const createNewCart = async (userId: string) => {
+  return await Cart.create({
+    userId,
+    status: CartStatus.ACTIVE,
+  });
+};
 
 const selectCartAndItems = async (userId: string) => {
   const cart = await Cart.findOne({
@@ -15,7 +23,11 @@ const selectCartAndItems = async (userId: string) => {
   }) as GetCartResult;
 
   if (!cart) {
-    return await Cart.create({ userId }) as GetCartResult;
+    const newCart = await createNewCart(userId);
+    return {
+      ...newCart,
+      items: [] as CartItem[],
+    } as GetCartResult;
   }
 
   return cart;
@@ -73,6 +85,7 @@ export const addProductToCart = async (productId: string, userId: string): CartS
     if (!cart) {
       cart = await Cart.create({
         userId,
+        status: CartStatus.ACTIVE,
       }, { transaction });
     }
   
@@ -159,4 +172,42 @@ export const calculateCartTotal = async (userId: string) => {
     type: CartItemActionType.SUCCESS,
     data: total,
   }
+};
+
+export const checkoutCart = async (orderInfo: OrderInfo) => {
+  const { userId } = orderInfo;
+  const notFoundResponse = {
+    type: CartItemActionType.NOT_FOUND,
+    message: "No active cart was found with items to purchase",
+  };
+  const cart = await Cart.findOne({
+    where: {
+      userId,
+      status: CartStatus.ACTIVE,
+    },
+    include: [{
+      model: CartItem,
+      as: 'items',
+    }]
+  });
+
+  if (!cart) {
+    await createNewCart(userId);
+
+    return notFoundResponse;
+  }
+
+  if (!cart.dataValues.items.length) {
+    return notFoundResponse;
+  }
+
+  cart.status = CartStatus.ORDERED;
+  await cart.save();
+  await createNewCart(userId);
+  await publishOrderMessage(orderInfo);
+  
+  return {
+    type: CartItemActionType.CREATED,
+    message: "Checkout successful",
+  };
 };
