@@ -1,4 +1,4 @@
-import sequelize from "./dbinit";
+import sequelize from "./dbInit";
 import User from "./User";
 
 export default sequelize;
