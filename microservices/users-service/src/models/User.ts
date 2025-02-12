@@ -1,5 +1,5 @@
 import { DataTypes, Model } from "sequelize";
-import sequelize from "./dbinit";
+import sequelize from "./dbInit";
 
 class User extends Model {
   public id!: number;
@@ -126,12 +126,12 @@ User.init(
     resetPasswordExpires: {
       type: DataTypes.DATE,
       allowNull: true,
-    }
+    },
   },
   {
     sequelize,
-    tableName: 'users',
-  },
+    tableName: "users",
+  }
 );
 
 export default User;
