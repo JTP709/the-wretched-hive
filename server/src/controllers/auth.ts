@@ -9,7 +9,7 @@ import {
   resetUserPassword,
   revokeRefreshToken,
 } from "../services";
-import { Login, SignUp } from "../grpc/usersClient";
+import { Login, Logout, SignUp } from "../grpc/usersClient";
 import { UsersActionType } from "../types/enums";
 
 export const signup = async (req: Request, res: Response) => {
@@ -108,21 +108,17 @@ export const login = async (req: Request, res: Response) => {
 
 export const logout = async (req: Request, res: Response) => {
   const refreshToken = req.cookies.refreshToken;
+  res.clearCookie("accessToken", baseTokenCookieOptions);
+  res.clearCookie("refreshToken", baseTokenCookieOptions);
+
   if (!refreshToken) {
-    res.status(404);
+    res.status(400).json({ message: "Refresh token is required" });
     return;
   }
 
-  try {
-    await revokeRefreshToken(refreshToken);
+  await Logout(refreshToken);
 
-    res.clearCookie("accessToken", baseTokenCookieOptions);
-    res.clearCookie("refreshToken", baseTokenCookieOptions);
-
-    res.status(204).json({ message: "Logout successful" });
-  } catch (err) {
-    handleErrors(res, err);
-  }
+  res.status(204).json({ message: "Logout successful" });
 };
 
 export const refresh_token = async (req: Request, res: Response) => {
