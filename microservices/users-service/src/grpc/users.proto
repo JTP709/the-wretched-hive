@@ -8,6 +8,7 @@ enum ActionType {
   NOT_FOUND = 2;
   BAD_REQUEST = 3;
   CONFLICT = 4;
+  FORBIDDEN = 5;
 }
 
 message GetUserRequest {
@@ -61,9 +62,19 @@ message PostLogoutResponse {
   string message = 2;
 }
 
+message PostRefreshTokenRequest {
+  string refreshToken = 1;
+}
+
+message PostRefreshTokenResponse {
+  ActionType type = 1;
+  string message = 2;
+}
+
 service UsersService {
   rpc GetUser(GetUserRequest) returns (GetUserResponse);
   rpc PostSignUp(PostSignUpRequest) returns (PostSignUpResponse);
   rpc PostLogin(PostLoginRequest) returns (PostLoginResponse);
   rpc PostLogout(PostLogoutRequest) returns (PostLogoutResponse);
+  rpc PostRefreshToken(PostRefreshTokenRequest) returns (PostRefreshTokenResponse);
 }

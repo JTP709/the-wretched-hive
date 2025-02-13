@@ -7,7 +7,13 @@ import {
 } from "@grpc/grpc-js";
 import { loadSync } from "@grpc/proto-loader";
 import sequelize from "./models";
-import { get_user, post_login, post_logout, post_signup } from "./controllers";
+import {
+  get_user,
+  post_login,
+  post_logout,
+  post_refresh_token,
+  post_signup,
+} from "./controllers";
 
 const PROTO_PATH = path.join(__dirname, "./grpc", "users.proto");
 
@@ -53,6 +59,7 @@ const onShutdown = async () => {
       PostSignUp: post_signup,
       PostLogin: post_login,
       PostLogout: post_logout,
+      PostRefreshToken: post_refresh_token,
     });
 
     const bindAddress = "0.0.0.0:50054";

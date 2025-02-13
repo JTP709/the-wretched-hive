@@ -1,6 +1,11 @@
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 import { User } from "../models";
-import { generateAccessToken, generateRefreshToken } from "./utils";
+import {
+  generateAccessToken,
+  generateRefreshToken,
+  REFRESH_TOKEN_SECRET,
+} from "./utils";
 
 export const createNewUser = async (userInfo: NewUserInfo) => {
   const { username, password } = userInfo;
@@ -43,4 +48,17 @@ export const revokeRefreshToken = async (refreshToken: string) => {
     user.refreshToken = null;
     await user.save();
   }
+};
+
+export const refreshAccessToken = async (refreshToken: string) => {
+  const { userId } = jwt.verify(refreshToken, REFRESH_TOKEN_SECRET) as {
+    userId: number;
+  };
+  const user = await User.findByPk(userId);
+
+  if (!user || user.refreshToken !== refreshToken) {
+    throw new Error("Invalid refresh token");
+  }
+
+  return generateAccessToken(user.id);
 };

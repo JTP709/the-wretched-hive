@@ -2,6 +2,7 @@ import { sendUnaryData, ServerUnaryCall, status } from "@grpc/grpc-js";
 import {
   authenticateUser,
   createNewUser,
+  refreshAccessToken,
   revokeRefreshToken,
 } from "../services";
 
@@ -11,6 +12,7 @@ enum UsersActionType {
   NOT_FOUND = "NOT_FOUND",
   BAD_REQUEST = "BAD_REQUEST",
   CONFLICT = "CONFLICT",
+  FORBIDDEN = "FORBIDDEN",
 }
 
 export const get_user = async (
@@ -141,7 +143,27 @@ export const post_refresh_token = async (
   call: ServerUnaryCall<any, any>,
   callback: sendUnaryData<any>
 ) => {
-  callback(null, { name: "Jon Prell" });
+  const { refreshToken } = call.request;
+  await refreshAccessToken(refreshToken)
+    .then((accessToken: string) => {
+      callback(null, {
+        type: UsersActionType.SUCCESS,
+        data: accessToken,
+      });
+    })
+    .catch((err: any) => {
+      if (err?.message === "Invalid refresh token") {
+        callback(null, {
+          type: UsersActionType.FORBIDDEN,
+          message: "Invalid refresh token",
+        });
+      } else {
+        callback(null, {
+          code: status.INTERNAL,
+          message: err?.message || "Internal server error",
+        });
+      }
+    });
 };
 
 export const post_forgot_password = async (
