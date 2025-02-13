@@ -32,7 +32,6 @@ export const signup = async (req: Request, res: Response) => {
   if (!firstName) missingFields.push("firstName");
   if (!lastName) missingFields.push("lastName");
   if (!streetAddress) missingFields.push("streetAddress");
-  if (!streetAddressTwo) missingFields.push("streetAddressTwo");
   if (!city) missingFields.push("city");
   if (!planet) missingFields.push("planet");
   if (!postalCode) missingFields.push("postalCode");
@@ -43,11 +42,7 @@ export const signup = async (req: Request, res: Response) => {
     return;
   }
 
-  const {
-    data: newUser,
-    message,
-    type,
-  } = await SignUp(
+  const { message, type } = await SignUp(
     username,
     password,
     email,
@@ -66,8 +61,7 @@ export const signup = async (req: Request, res: Response) => {
     });
   } else if (type === UsersActionType.SUCCESS) {
     res.status(201).json({
-      message: "User created successfully",
-      user: { id: newUser.id, username: newUser.username },
+      message: message || "User created successfully",
     });
   } else {
     console.log("Sign up error:", message);
