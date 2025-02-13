@@ -1,5 +1,9 @@
 import { sendUnaryData, ServerUnaryCall, status } from "@grpc/grpc-js";
-import { authenticateUser, createNewUser } from "../services";
+import {
+  authenticateUser,
+  createNewUser,
+  revokeRefreshToken,
+} from "../services";
 
 enum UsersActionType {
   SUCCESS = "SUCCESS",
@@ -95,24 +99,42 @@ export const post_login = async (
       message: "Username and password are required",
     });
   }
-  const { accessToken, refreshToken } = await authenticateUser(
-    username,
-    password
-  );
-  callback(null, {
-    type: UsersActionType.SUCCESS,
-    data: {
-      accessToken,
-      refreshToken,
-    },
-  });
+  await authenticateUser(username, password)
+    .then(({ accessToken, refreshToken }) => {
+      callback(null, {
+        type: UsersActionType.SUCCESS,
+        data: {
+          accessToken,
+          refreshToken,
+        },
+      });
+    })
+    .catch((err: any) => {
+      if (err?.message === "Incorrect username or password") {
+        callback(null, {
+          type: UsersActionType.CONFLICT,
+          message: "Incorrect username or password",
+        });
+      } else {
+        console.error(err);
+        callback(null, {
+          code: status.INTERNAL,
+          message: err?.message || "Internal server error",
+        });
+      }
+    });
 };
 
 export const post_logout = async (
   call: ServerUnaryCall<any, any>,
   callback: sendUnaryData<any>
 ) => {
-  callback(null, { name: "Jon Prell" });
+  const { refreshToken } = call.request;
+  await revokeRefreshToken(refreshToken);
+  callback(null, {
+    type: UsersActionType.SUCCESS,
+    message: "Refresh token revoked",
+  });
 };
 
 export const post_refresh_token = async (

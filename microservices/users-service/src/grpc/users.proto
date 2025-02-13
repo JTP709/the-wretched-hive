@@ -52,8 +52,18 @@ message PostLoginResponse {
   Tokens data = 3;
 }
 
+message PostLogoutRequest {
+  string refreshToken = 1;
+}
+
+message PostLogoutResponse {
+  ActionType type = 1;
+  string message = 2;
+}
+
 service UsersService {
   rpc GetUser(GetUserRequest) returns (GetUserResponse);
   rpc PostSignUp(PostSignUpRequest) returns (PostSignUpResponse);
   rpc PostLogin(PostLoginRequest) returns (PostLoginResponse);
+  rpc PostLogout(PostLogoutRequest) returns (PostLogoutResponse);
 }

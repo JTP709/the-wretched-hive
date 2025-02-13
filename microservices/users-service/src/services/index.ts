@@ -36,3 +36,11 @@ export const authenticateUser = async (username: string, password: string) => {
 
   return { accessToken, refreshToken };
 };
+
+export const revokeRefreshToken = async (refreshToken: string) => {
+  const user = await User.findOne({ where: { refreshToken } });
+  if (user) {
+    user.refreshToken = null;
+    await user.save();
+  }
+};
