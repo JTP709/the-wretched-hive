@@ -1,19 +1,12 @@
 import { Request, Response } from "express";
-import { handleErrors } from "../utils";
 import { baseTokenCookieOptions } from "../utils/cookieOptions";
-import {
-  authenticateUser,
-  createNewUser,
-  refreshAuthToken,
-  requestResetPasswordEmail,
-  resetUserPassword,
-  revokeRefreshToken,
-} from "../services";
+
 import {
   ForgotPassword,
   Login,
   Logout,
   RefreshToken,
+  ResetPassword,
   SignUp,
 } from "../grpc/usersClient";
 import { UsersActionType } from "../types/enums";
@@ -183,15 +176,13 @@ export const reset_password = async (req: Request, res: Response) => {
     return;
   }
 
-  try {
-    await resetUserPassword(token, password);
+  const { type, message } = await ResetPassword(token, password);
 
-    res.status(200).json({ message: "Password reset successful" });
-  } catch (err) {
-    if ((err as Error)?.message === "Invalid or expired token") {
-      res.status(400).json({ message: "Invalid or expired token" });
-    } else {
-      handleErrors(res, err);
-    }
+  if (type === UsersActionType.SUCCESS) {
+    res.status(200).json({ message: message || "Password reset successful" });
+  } else if (type === UsersActionType.BAD_REQUEST) {
+    res.status(400).json({ message: "Invalid or expired token" });
+  } else {
+    res.status(500).json({ message: message || "Internal server error" });
   }
 };

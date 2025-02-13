@@ -195,7 +195,7 @@ export const reset_password = async (
     .then(() => {
       callback(null, {
         type: UsersActionType.SUCCESS,
-        message: "Password reset successfull",
+        message: "Password reset successful",
       });
     })
     .catch((err: any) => {
