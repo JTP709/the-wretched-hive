@@ -1,7 +1,8 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import crypto from "crypto";
 import { User } from "../models";
-import {
+import sendPasswordResetEmail, {
   generateAccessToken,
   generateRefreshToken,
   REFRESH_TOKEN_SECRET,
@@ -48,6 +49,8 @@ export const revokeRefreshToken = async (refreshToken: string) => {
     user.refreshToken = null;
     await user.save();
   }
+
+  return;
 };
 
 export const refreshAccessToken = async (refreshToken: string) => {
@@ -61,4 +64,21 @@ export const refreshAccessToken = async (refreshToken: string) => {
   }
 
   return generateAccessToken(user.id);
+};
+
+export const requestResetPasswordEmail = async (email: string) => {
+  const user = await User.findOne({ where: { email } });
+  if (!user) return;
+
+  const token = crypto.randomBytes(32).toString("hex");
+  const hashed = crypto.createHash("sha256").update(token).digest("hex");
+  const expires = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
+  user.resetPasswordToken = hashed;
+  user.resetPasswordExpires = expires;
+  await user.save();
+
+  const resetLink = `http://localhost:3000/reset-password?token=${token}`;
+  await sendPasswordResetEmail(user.email, resetLink);
+
+  return;
 };

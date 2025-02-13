@@ -9,6 +9,7 @@ import { loadSync } from "@grpc/proto-loader";
 import sequelize from "./models";
 import {
   get_user,
+  post_forgot_password,
   post_login,
   post_logout,
   post_refresh_token,
@@ -56,10 +57,11 @@ const onShutdown = async () => {
     const server = new Server();
     server.addService(usersProto.UsersService.service, {
       GetUser: get_user,
-      PostSignUp: post_signup,
-      PostLogin: post_login,
-      PostLogout: post_logout,
-      PostRefreshToken: post_refresh_token,
+      SignUp: post_signup,
+      Login: post_login,
+      Logout: post_logout,
+      RefreshToken: post_refresh_token,
+      ForgotPassword: post_forgot_password,
     });
 
     const bindAddress = "0.0.0.0:50054";

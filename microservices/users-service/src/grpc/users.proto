@@ -19,7 +19,7 @@ message GetUserResponse {
   string name = 1;
 }
 
-message PostSignUpRequest {
+message SignUpRequest {
   string username = 1;
   string password = 2;
   string email = 3;
@@ -32,12 +32,12 @@ message PostSignUpRequest {
   string postalCode = 10;
 }
 
-message PostSignUpResponse {
+message SignUpResponse {
   ActionType type = 1;
   string message = 2;
 }
 
-message PostLoginRequest {
+message LoginRequest {
   string username = 1;
   string password = 2;
 }
@@ -47,34 +47,44 @@ message Tokens {
   string refreshToken = 1;
 }
 
-message PostLoginResponse {
+message LoginResponse {
   ActionType type = 1;
   string message = 2;
   Tokens data = 3;
 }
 
-message PostLogoutRequest {
+message LogoutRequest {
   string refreshToken = 1;
 }
 
-message PostLogoutResponse {
+message LogoutResponse {
   ActionType type = 1;
   string message = 2;
 }
 
-message PostRefreshTokenRequest {
+message RefreshTokenRequest {
   string refreshToken = 1;
 }
 
-message PostRefreshTokenResponse {
+message RefreshTokenResponse {
+  ActionType type = 1;
+  string message = 2;
+}
+
+message ForgotPasswordRequest {
+  string email = 1;
+}
+
+message ForgotPasswordResponse {
   ActionType type = 1;
   string message = 2;
 }
 
 service UsersService {
   rpc GetUser(GetUserRequest) returns (GetUserResponse);
-  rpc PostSignUp(PostSignUpRequest) returns (PostSignUpResponse);
-  rpc PostLogin(PostLoginRequest) returns (PostLoginResponse);
-  rpc PostLogout(PostLogoutRequest) returns (PostLogoutResponse);
-  rpc PostRefreshToken(PostRefreshTokenRequest) returns (PostRefreshTokenResponse);
+  rpc SignUp(SignUpRequest) returns (SignUpResponse);
+  rpc Login(LoginRequest) returns (LoginResponse);
+  rpc Logout(LogoutRequest) returns (LogoutResponse);
+  rpc RefreshToken(RefreshTokenRequest) returns (RefreshTokenResponse);
+  rpc ForgotPassword(ForgotPasswordRequest) returns (ForgotPasswordResponse);
 }

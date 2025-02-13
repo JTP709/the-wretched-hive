@@ -3,6 +3,7 @@ import {
   authenticateUser,
   createNewUser,
   refreshAccessToken,
+  requestResetPasswordEmail,
   revokeRefreshToken,
 } from "../services";
 
@@ -170,6 +171,20 @@ export const post_forgot_password = async (
   call: ServerUnaryCall<any, any>,
   callback: sendUnaryData<any>
 ) => {
+  const { email } = call.request;
+  await requestResetPasswordEmail(email)
+    .then(() => {
+      callback(null, {
+        type: UsersActionType.SUCCESS,
+        message: "If the email exists, reset instructions were sent",
+      });
+    })
+    .catch((err: any) => {
+      callback(null, {
+        code: status.INTERNAL,
+        message: "Internal server error",
+      });
+    });
   callback(null, { name: "Jon Prell" });
 };
 
