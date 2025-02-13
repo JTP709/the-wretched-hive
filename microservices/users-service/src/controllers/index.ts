@@ -101,12 +101,6 @@ export const login = async (
   callback: sendUnaryData<any>
 ) => {
   const { username, password } = call.request;
-  if (!username || !password) {
-    callback(null, {
-      type: UsersActionType.BAD_REQUEST,
-      message: "Username and password are required",
-    });
-  }
   await authenticateUser(username, password)
     .then(({ accessToken, refreshToken }) => {
       callback(null, {

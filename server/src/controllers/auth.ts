@@ -9,6 +9,8 @@ import {
   resetUserPassword,
   revokeRefreshToken,
 } from "../services";
+import { Login, SignUp } from "../grpc/usersClient";
+import { UsersActionType } from "../types/enums";
 
 export const signup = async (req: Request, res: Response) => {
   const {
@@ -24,18 +26,6 @@ export const signup = async (req: Request, res: Response) => {
     postalCode,
   } = req.body;
 
-  const userInfo: NewUserInfo = {
-    username,
-    password,
-    email,
-    firstName,
-    lastName,
-    streetAddress,
-    streetAddressTwo,
-    city,
-    planet,
-    postalCode,
-  };
   const missingFields = [];
   if (!username) missingFields.push("username");
   if (!password) missingFields.push("password");
@@ -48,29 +38,41 @@ export const signup = async (req: Request, res: Response) => {
   if (!planet) missingFields.push("planet");
   if (!postalCode) missingFields.push("postalCode");
   if (missingFields.length) {
-    res
-      .status(400)
-      .json({
-        message: `The following fields are required: ${missingFields.join(
-          ", "
-        )}`,
-      });
+    res.status(400).json({
+      message: `The following fields are required: ${missingFields.join(", ")}`,
+    });
     return;
   }
 
-  try {
-    const newUser = await createNewUser(userInfo);
+  const {
+    data: newUser,
+    message,
+    type,
+  } = await SignUp(
+    username,
+    password,
+    email,
+    firstName,
+    lastName,
+    streetAddress,
+    streetAddressTwo,
+    city,
+    planet,
+    postalCode
+  );
 
+  if (message === "Username already exists") {
+    res.status(400).json({
+      message: "Username already exists",
+    });
+  } else if (type === UsersActionType.SUCCESS) {
     res.status(201).json({
       message: "User created successfully",
       user: { id: newUser.id, username: newUser.username },
     });
-  } catch (err) {
-    if ((err as Error)?.message === "Username already exists") {
-      res.status(400).json({ message: (err as Error)?.message });
-    } else {
-      handleErrors(res, err);
-    }
+  } else {
+    console.log("Sign up error:", message);
+    res.status(500).json({ message: message || "Internal server error" });
   }
 };
 
@@ -82,11 +84,9 @@ export const login = async (req: Request, res: Response) => {
     return;
   }
 
-  try {
-    const { accessToken, refreshToken } = await authenticateUser(
-      username,
-      password
-    );
+  const { type, data, message } = await Login(username, password);
+  if (type === UsersActionType.SUCCESS) {
+    const { accessToken, refreshToken } = data;
 
     res.cookie("accessToken", accessToken, {
       ...baseTokenCookieOptions,
@@ -99,13 +99,10 @@ export const login = async (req: Request, res: Response) => {
     });
 
     res.status(201).json({ message: "Login successful" });
-  } catch (err) {
-    const error = err as Error;
-    if (error?.message === "Incorrect username or password") {
-      res.status(401).json({ message: "Incorrect username or password" });
-    } else {
-      handleErrors(res, err);
-    }
+  } else if (type === UsersActionType.CONFLICT) {
+    res.status(401).json({ message: "Incorrect username or password" });
+  } else {
+    res.status(500).json({ message: message || "Internal server error" });
   }
 };
 
@@ -145,11 +142,9 @@ export const refresh_token = async (req: Request, res: Response) => {
 
     res.status(200).json({ message: "Token refreshed" });
   } catch (err) {
-    res
-      .status(403)
-      .json({
-        message: (err as Error)?.message || "Invalid or expired refresh token",
-      });
+    res.status(403).json({
+      message: (err as Error)?.message || "Invalid or expired refresh token",
+    });
   }
 };
 
