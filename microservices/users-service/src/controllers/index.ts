@@ -24,7 +24,7 @@ export const get_user = async (
   callback(null, { name: "Jon Prell" });
 };
 
-export const post_signup = async (
+export const signup = async (
   call: ServerUnaryCall<any, any>,
   callback: sendUnaryData<any>
 ) => {
@@ -92,7 +92,7 @@ export const post_signup = async (
     });
 };
 
-export const post_login = async (
+export const login = async (
   call: ServerUnaryCall<any, any>,
   callback: sendUnaryData<any>
 ) => {
@@ -129,7 +129,7 @@ export const post_login = async (
     });
 };
 
-export const post_logout = async (
+export const logout = async (
   call: ServerUnaryCall<any, any>,
   callback: sendUnaryData<any>
 ) => {
@@ -141,7 +141,7 @@ export const post_logout = async (
   });
 };
 
-export const post_refresh_token = async (
+export const refresh_token = async (
   call: ServerUnaryCall<any, any>,
   callback: sendUnaryData<any>
 ) => {
@@ -168,7 +168,7 @@ export const post_refresh_token = async (
     });
 };
 
-export const post_forgot_password = async (
+export const forgot_password = async (
   call: ServerUnaryCall<any, any>,
   callback: sendUnaryData<any>
 ) => {
@@ -188,7 +188,7 @@ export const post_forgot_password = async (
     });
 };
 
-export const post_reset_password = async (
+export const reset_password = async (
   call: ServerUnaryCall<any, any>,
   callback: sendUnaryData<any>
 ) => {
