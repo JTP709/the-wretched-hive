@@ -9,7 +9,13 @@ import {
   resetUserPassword,
   revokeRefreshToken,
 } from "../services";
-import { Login, Logout, RefreshToken, SignUp } from "../grpc/usersClient";
+import {
+  ForgotPassword,
+  Login,
+  Logout,
+  RefreshToken,
+  SignUp,
+} from "../grpc/usersClient";
 import { UsersActionType } from "../types/enums";
 
 export const signup = async (req: Request, res: Response) => {
@@ -158,14 +164,14 @@ export const forgot_password = async (req: Request, res: Response) => {
     return;
   }
 
-  try {
-    await requestResetPasswordEmail(email);
+  const { type, message } = await ForgotPassword(email);
 
-    res
-      .status(200)
-      .json({ message: "If the email exists, reset instructions were sent" });
-  } catch (err) {
-    handleErrors(res, err);
+  if (type === UsersActionType.SUCCESS) {
+    res.status(200).json({
+      message: message || "If the email exists, reset instructions were sent",
+    });
+  } else {
+    res.status(500).json({ message: message || "Internal server error" });
   }
 };
 
