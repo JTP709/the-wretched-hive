@@ -1,0 +1,114 @@
+syntax = "proto3";
+
+package users;
+
+enum ActionType {
+  SUCCESS = 0;
+  CREATED = 1;
+  NOT_FOUND = 2;
+  BAD_REQUEST = 3;
+  CONFLICT = 4;
+  FORBIDDEN = 5;
+}
+
+message GetUserRequest {
+  string userId = 1;
+}
+
+message User {
+  string username = 1;
+  string email = 3;
+  string firstName = 4;
+  string lastName = 5;
+  string streetAddress = 6;
+  string streetAddressTwo = 7;
+  string city = 8;
+  string planet = 9;
+  string postalCode = 10;
+}
+
+message GetUserResponse {
+  ActionType type = 1;
+  User data = 2;
+}
+
+message SignUpRequest {
+  string username = 1;
+  string password = 2;
+  string email = 3;
+  string firstName = 4;
+  string lastName = 5;
+  string streetAddress = 6;
+  string streetAddressTwo = 7;
+  string city = 8;
+  string planet = 9;
+  string postalCode = 10;
+}
+
+message SignUpResponse {
+  ActionType type = 1;
+  string message = 2;
+}
+
+message LoginRequest {
+  string username = 1;
+  string password = 2;
+}
+
+message Tokens {
+  string accessToken = 1;
+  string refreshToken = 2;
+}
+
+message LoginResponse {
+  ActionType type = 1;
+  string message = 2;
+  Tokens data = 3;
+}
+
+message LogoutRequest {
+  string refreshToken = 1;
+}
+
+message LogoutResponse {
+  ActionType type = 1;
+  string message = 2;
+}
+
+message RefreshTokenRequest {
+  string refreshToken = 1;
+}
+
+message RefreshTokenResponse {
+  ActionType type = 1;
+  string message = 2;
+}
+
+message ForgotPasswordRequest {
+  string email = 1;
+}
+
+message ForgotPasswordResponse {
+  ActionType type = 1;
+  string message = 2;
+}
+
+message ResetPasswordRequest {
+  string token = 1;
+  string password = 2;
+}
+
+message ResetPasswordResponse {
+  ActionType type = 1;
+  string message = 2;
+}
+
+service UsersService {
+  rpc GetUser(GetUserRequest) returns (GetUserResponse);
+  rpc SignUp(SignUpRequest) returns (SignUpResponse);
+  rpc Login(LoginRequest) returns (LoginResponse);
+  rpc Logout(LogoutRequest) returns (LogoutResponse);
+  rpc RefreshToken(RefreshTokenRequest) returns (RefreshTokenResponse);
+  rpc ForgotPassword(ForgotPasswordRequest) returns (ForgotPasswordResponse);
+  rpc ResetPassword(ResetPasswordRequest) returns (ResetPasswordResponse);
+}

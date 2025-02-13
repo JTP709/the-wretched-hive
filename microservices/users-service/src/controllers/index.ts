@@ -23,7 +23,7 @@ export const get_user = async (
   callback: sendUnaryData<any>
 ) => {
   const { userId } = call.request;
-  const user = await getUser(userId)
+  await getUser(userId)
     .then((user: User) => {
       callback(null, {
         type: UsersActionType.SUCCESS,
@@ -61,23 +61,6 @@ export const signup = async (
     planet,
     postalCode,
   } = call.request;
-  const missingFields = [];
-  if (!username) missingFields.push("username");
-  if (!password) missingFields.push("password");
-  if (!email) missingFields.push("email");
-  if (!firstName) missingFields.push("firstName");
-  if (!lastName) missingFields.push("lastName");
-  if (!streetAddress) missingFields.push("streetAddress");
-  if (!streetAddressTwo) missingFields.push("streetAddressTwo");
-  if (!city) missingFields.push("city");
-  if (!planet) missingFields.push("planet");
-  if (!postalCode) missingFields.push("postalCode");
-  if (missingFields.length) {
-    callback(null, {
-      type: UsersActionType.BAD_REQUEST,
-      message: `The following fields are required: ${missingFields.join()}`,
-    });
-  }
 
   await createNewUser({
     username,
