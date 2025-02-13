@@ -185,7 +185,6 @@ export const post_forgot_password = async (
         message: "Internal server error",
       });
     });
-  callback(null, { name: "Jon Prell" });
 };
 
 export const post_reset_password = async (
