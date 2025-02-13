@@ -9,7 +9,7 @@ import {
   resetUserPassword,
   revokeRefreshToken,
 } from "../services";
-import { Login, Logout, SignUp } from "../grpc/usersClient";
+import { Login, Logout, RefreshToken, SignUp } from "../grpc/usersClient";
 import { UsersActionType } from "../types/enums";
 
 export const signup = async (req: Request, res: Response) => {
@@ -129,18 +129,25 @@ export const refresh_token = async (req: Request, res: Response) => {
     return;
   }
 
-  try {
-    const newAccessToken = await refreshAuthToken(refreshToken);
+  const {
+    type,
+    data: newAccessToken,
+    message,
+  } = await RefreshToken(refreshToken);
+
+  if (type === UsersActionType.SUCCESS) {
     res.cookie("accessToken", newAccessToken, {
       ...baseTokenCookieOptions,
       maxAge: 15 * 60 * 1000, // 15 minutes
     });
 
     res.status(200).json({ message: "Token refreshed" });
-  } catch (err) {
-    res.status(403).json({
-      message: (err as Error)?.message || "Invalid or expired refresh token",
-    });
+  } else if (type === UsersActionType.FORBIDDEN) {
+    res
+      .status(403)
+      .json({ message: message || "Invalid or expired refresh token" });
+  } else {
+    res.status(500).json({ message: message || "Internal server error" });
   }
 };
 
