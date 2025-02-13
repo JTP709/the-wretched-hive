@@ -80,6 +80,16 @@ message ForgotPasswordResponse {
   string message = 2;
 }
 
+message ResetPasswordRequest {
+  string token = 1;
+  string password = 2;
+}
+
+message ResetPasswordResponse {
+  ActionType type = 1;
+  string message = 2;
+}
+
 service UsersService {
   rpc GetUser(GetUserRequest) returns (GetUserResponse);
   rpc SignUp(SignUpRequest) returns (SignUpResponse);
@@ -87,4 +97,5 @@ service UsersService {
   rpc Logout(LogoutRequest) returns (LogoutResponse);
   rpc RefreshToken(RefreshTokenRequest) returns (RefreshTokenResponse);
   rpc ForgotPassword(ForgotPasswordRequest) returns (ForgotPasswordResponse);
+  rpc ResetPassword(ResetPasswordRequest) returns (ResetPasswordResponse);
 }

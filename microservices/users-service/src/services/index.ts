@@ -7,6 +7,7 @@ import sendPasswordResetEmail, {
   generateRefreshToken,
   REFRESH_TOKEN_SECRET,
 } from "./utils";
+import { Op } from "sequelize";
 
 export const createNewUser = async (userInfo: NewUserInfo) => {
   const { username, password } = userInfo;
@@ -79,6 +80,30 @@ export const requestResetPasswordEmail = async (email: string) => {
 
   const resetLink = `http://localhost:3000/reset-password?token=${token}`;
   await sendPasswordResetEmail(user.email, resetLink);
+
+  return;
+};
+
+export const resetUserPassword = async (token: string, password: string) => {
+  const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+  const user = await User.findOne({
+    where: {
+      resetPasswordToken: hashedToken,
+      resetPasswordExpires: {
+        [Op.gt]: new Date(),
+      },
+    },
+  });
+
+  if (!user) {
+    throw new Error("Invalid or expired token");
+  }
+
+  const hashedPassword = await bcrypt.hash(password, 10);
+  user.password = hashedPassword;
+  user.resetPasswordToken = null;
+  user.resetPasswordExpires = null;
+  await user.save();
 
   return;
 };

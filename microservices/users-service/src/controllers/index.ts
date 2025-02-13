@@ -4,6 +4,7 @@ import {
   createNewUser,
   refreshAccessToken,
   requestResetPasswordEmail,
+  resetUserPassword,
   revokeRefreshToken,
 } from "../services";
 
@@ -191,5 +192,25 @@ export const post_reset_password = async (
   call: ServerUnaryCall<any, any>,
   callback: sendUnaryData<any>
 ) => {
-  callback(null, { name: "Jon Prell" });
+  const { token, password } = call.request;
+  await resetUserPassword(token, password)
+    .then(() => {
+      callback(null, {
+        type: UsersActionType.SUCCESS,
+        message: "Password reset successfull",
+      });
+    })
+    .catch((err: any) => {
+      if (err?.message === "Invalid or expired token") {
+        callback(null, {
+          type: UsersActionType.BAD_REQUEST,
+          message: "Invalid or expired token",
+        });
+      } else {
+        callback(null, {
+          code: status.INTERNAL,
+          message: err?.message || "Internal server error",
+        });
+      }
+    });
 };

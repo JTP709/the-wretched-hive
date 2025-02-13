@@ -13,6 +13,7 @@ import {
   post_login,
   post_logout,
   post_refresh_token,
+  post_reset_password,
   post_signup,
 } from "./controllers";
 
@@ -62,6 +63,7 @@ const onShutdown = async () => {
       Logout: post_logout,
       RefreshToken: post_refresh_token,
       ForgotPassword: post_forgot_password,
+      ResetPassword: post_reset_password,
     });
 
     const bindAddress = "0.0.0.0:50054";
