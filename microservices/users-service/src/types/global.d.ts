@@ -4,7 +4,7 @@ interface User {
   firstName: string;
   lastName: string;
   streetAddress: string;
-  streetAddressTwo: string;
+  streetAddressTwo?: string;
   city: string;
   planet: string;
   postalCode: string;

@@ -15,8 +15,21 @@ message GetUserRequest {
   string userId = 1;
 }
 
+message User {
+  string username = 1;
+  string email = 3;
+  string firstName = 4;
+  string lastName = 5;
+  string streetAddress = 6;
+  string streetAddressTwo = 7;
+  string city = 8;
+  string planet = 9;
+  string postalCode = 10;
+}
+
 message GetUserResponse {
-  string name = 1;
+  ActionType type = 1;
+  User data = 2;
 }
 
 message SignUpRequest {

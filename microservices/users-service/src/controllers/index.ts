@@ -2,6 +2,7 @@ import { sendUnaryData, ServerUnaryCall, status } from "@grpc/grpc-js";
 import {
   authenticateUser,
   createNewUser,
+  getUser,
   refreshAccessToken,
   requestResetPasswordEmail,
   resetUserPassword,
@@ -21,7 +22,27 @@ export const get_user = async (
   call: ServerUnaryCall<any, any>,
   callback: sendUnaryData<any>
 ) => {
-  callback(null, { name: "Jon Prell" });
+  const { userId } = call.request;
+  const user = await getUser(userId)
+    .then((user: User) => {
+      callback(null, {
+        type: UsersActionType.SUCCESS,
+        data: user,
+      });
+    })
+    .catch((err: any) => {
+      if (err?.message === "User not found") {
+        callback(null, {
+          type: UsersActionType.NOT_FOUND,
+          message: "User not found",
+        });
+      } else {
+        callback(null, {
+          code: status.INTERNAL,
+          message: err?.message || "Internal server error",
+        });
+      }
+    });
 };
 
 export const signup = async (

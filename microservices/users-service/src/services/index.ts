@@ -9,6 +9,31 @@ import sendPasswordResetEmail, {
 } from "./utils";
 import { Op } from "sequelize";
 
+export const getUser = async (userId: string) => {
+  const user = await User.findOne({
+    attributes: [
+      "username",
+      "email",
+      "firstName",
+      "lastName",
+      "streetAddress",
+      "streetAddressTwo",
+      "city",
+      "planet",
+      "postalCode",
+    ],
+    where: {
+      id: userId,
+    },
+  });
+
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  return user;
+};
+
 export const createNewUser = async (userInfo: NewUserInfo) => {
   const { username, password } = userInfo;
   const existingUser = await User.findOne({ where: { username } });
