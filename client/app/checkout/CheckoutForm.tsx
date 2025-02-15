@@ -18,10 +18,21 @@ export default function CheckoutForm({ total, user }: CheckoutFormProps) {
     const form = e.currentTarget;
     const name = form.elements.namedItem('name') as HTMLInputElement;
     const email = form.elements.namedItem('email') as HTMLInputElement;
-    const address = form.elements.namedItem('name') as HTMLInputElement;
-    const phone = form.elements.namedItem('name') as HTMLInputElement;
+    const streetAddress = form.elements.namedItem('streetAddress') as HTMLInputElement;
+    const city = form.elements.namedItem('city') as HTMLInputElement;
+    const planet = form.elements.namedItem('planet') as HTMLInputElement;
+    const postalCode = form.elements.namedItem('postalCode') as HTMLInputElement;
+    const phone = form.elements.namedItem('phone') as HTMLInputElement;
 
-    if (!name.value.trim() || !email.value.trim() || !address.value.trim() || !phone.value.trim()) {
+    if (
+      !name.value.trim() ||
+      !email.value.trim() ||
+      !streetAddress.value.trim() ||
+      !city.value.trim() ||
+      !planet.value.trim() ||
+      !postalCode.value.trim() ||
+      !phone.value.trim()
+    ) {
       alert('The form is incomplete');
       return;
     }
