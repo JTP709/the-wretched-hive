@@ -2,34 +2,39 @@ import { Op } from "sequelize";
 import { Product } from "../models";
 
 export enum ProductsActionType {
-  SUCCESS = 'SUCCESS',
-  NOT_FOUND = 'NOT_FOUND',
+  SUCCESS = "SUCCESS",
+  NOT_FOUND = "NOT_FOUND",
 }
 
 export type PaginatedProductsResponse = {
-  total: number,
-  totalPages: number,
-  products: Product[],
-}
+  total: number;
+  totalPages: number;
+  products: Product[];
+};
 
 type ProductsServiceResult = Promise<{
-  type: ProductsActionType,
-  message?: string,
-  data?: Product | PaginatedProductsResponse,
-}>
+  type: ProductsActionType;
+  message?: string;
+  data?: Product | PaginatedProductsResponse;
+}>;
 
-export const getPaginatedProducts = async (searchQuery: string | null, limit: number, page: number): ProductsServiceResult => {
+export const getPaginatedProducts = async (
+  searchQuery: string | null,
+  limit: number,
+  page: number
+): ProductsServiceResult => {
   const offset = (page - 1) * limit;
   const where = searchQuery
-  ? {
-    [Op.or]: [
-      { name: { [Op.like]: `%${searchQuery}%` } },
-      { description: { [Op.like]: `%${searchQuery}%` } },
-    ]
-  } : {};
+    ? {
+        [Op.or]: [
+          { name: { [Op.like]: `%${searchQuery}%` } },
+          { description: { [Op.like]: `%${searchQuery}%` } },
+        ],
+      }
+    : {};
 
   const { count: total, rows: products } = await Product.findAndCountAll({
-    order: [['id', 'ASC']],
+    order: [["id", "ASC"]],
     limit,
     offset,
     where,
@@ -40,7 +45,7 @@ export const getPaginatedProducts = async (searchQuery: string | null, limit: nu
   if (products.length === 0) {
     return {
       type: ProductsActionType.NOT_FOUND,
-    }
+    };
   }
 
   return {
@@ -60,11 +65,11 @@ export const getProduct = async (productId: string): ProductsServiceResult => {
     return {
       type: ProductsActionType.NOT_FOUND,
       message: "Product not found",
-    }
+    };
   }
 
   return {
     type: ProductsActionType.SUCCESS,
     data: product,
-  }
+  };
 };

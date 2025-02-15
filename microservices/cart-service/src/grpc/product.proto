@@ -35,4 +35,5 @@ message PaginatedProductsResponse {
 service ProductService {
   rpc GetProduct(ProductRequest) returns (ProductResponse);
   rpc GetProducts(GetProductsRequest) returns (PaginatedProductsResponse);
+  rpc GetProductsStream(stream ProductRequest) returns (stream ProductResponse);
 }

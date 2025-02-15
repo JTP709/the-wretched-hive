@@ -1,7 +1,12 @@
 import client from "../grpc/productClient";
 import sequelize, { Cart, CartItem, CartStatus } from "../models";
 import { publishOrderMessage } from "../rabbitmq";
-import { CartItemActionType, CartProduct, CartServiceResult, GetCartResult } from "./types";
+import {
+  CartItemActionType,
+  CartProduct,
+  CartServiceResult,
+  GetCartResult,
+} from "./types";
 
 const createNewCart = async (userId: string) => {
   return await Cart.create({
@@ -11,16 +16,18 @@ const createNewCart = async (userId: string) => {
 };
 
 const selectCartAndItems = async (userId: string) => {
-  const cart = await Cart.findOne({
+  const cart = (await Cart.findOne({
     where: {
       userId,
       status: CartStatus.ACTIVE,
     },
-    include: [{
-      model: CartItem,
-      as: 'items',
-    }]
-  }) as GetCartResult;
+    include: [
+      {
+        model: CartItem,
+        as: "items",
+      },
+    ],
+  })) as GetCartResult;
 
   if (!cart) {
     const newCart = await createNewCart(userId);
@@ -34,45 +41,64 @@ const selectCartAndItems = async (userId: string) => {
 };
 
 const fetchProductInfo = async (cart: GetCartResult, userId: string) => {
-  if (!cart?.items) return [];
+  if (!cart?.items || cart.items.length === 0) return [];
+  const items = cart.items;
 
-  const productDetails = await Promise.all(
-    cart.items.map(item => {
-      return new Promise<CartProduct>((resolve) => {
-        const productId = item.dataValues.productId;
-        client.GetProduct({ productId }, (err: Error, response: any) => {
-          if (err) {
-            console.error(
-              `Could not fetch product details for ${productId}`,
-              { userId, err, cartId: cart.dataValues.id },
-            );
-            return resolve({} as CartProduct)
-          }
+  return new Promise<CartProduct[]>((resolve, reject) => {
+    const productStream = client.GetProductsStream();
 
-          resolve({
-            id: item.id,
-            quantity: item.quantity,
-            product: response
-          } as CartProduct)
-        })
-      })
-    })
-  );
+    const productIdToCartItem: Record<number, CartItem> = items.reduce(
+      (record, item) => {
+        const { productId } = item.dataValues;
+        record[productId] = item;
+        console.log({ productId }, typeof productId);
+        productStream.write({ productId });
 
-  return productDetails.filter(product => Object.keys(product).length > 0);
+        return record;
+      },
+      {} as Record<number, CartItem>
+    );
+
+    const results: CartProduct[] = [];
+
+    productStream.on("data", (response: any) => {
+      const cartItem = productIdToCartItem[response.id];
+      if (cartItem) {
+        results.push({
+          id: cartItem.id,
+          quantity: cartItem.quantity,
+          product: response,
+        });
+      }
+    });
+
+    productStream.on("error", (err: Error) => {
+      console.error(`Stream error for user ${userId}:`, err);
+      reject(err);
+    });
+
+    productStream.on("end", () => {
+      resolve(results);
+    });
+
+    productStream.end();
+  });
 };
 
 export const getCartItems = async (userId: string): CartServiceResult => {
   const cart = await selectCartAndItems(userId);
-  const data = await fetchProductInfo(cart, userId);    
+  const data = await fetchProductInfo(cart, userId);
 
   return {
     type: CartItemActionType.SUCCESS,
     data,
-  }
+  };
 };
 
-export const addProductToCart = async (productId: string, userId: string): CartServiceResult => {
+export const addProductToCart = async (
+  productId: string,
+  userId: string
+): CartServiceResult => {
   return await sequelize.transaction(async (transaction) => {
     let cart = await Cart.findOne({
       where: {
@@ -81,48 +107,54 @@ export const addProductToCart = async (productId: string, userId: string): CartS
       },
       transaction,
     });
-  
+
     if (!cart) {
-      cart = await Cart.create({
-        userId,
-        status: CartStatus.ACTIVE,
-      }, { transaction });
+      cart = await Cart.create(
+        {
+          userId,
+          status: CartStatus.ACTIVE,
+        },
+        { transaction }
+      );
     }
-  
+
     const [cartItem, created] = await CartItem.findOrCreate({
       where: { cartId: cart.id, productId },
       defaults: { cardId: cart.id, productId, quantity: 1 },
       transaction,
     });
-  
+
     if (!created) {
-      await cartItem.increment('quantity', { by: 1, transaction });
+      await cartItem.increment("quantity", { by: 1, transaction });
       await cartItem.reload({ transaction });
-  
+
       return {
         type: CartItemActionType.UPDATED,
-        data: cartItem
+        data: cartItem,
       };
     }
-  
+
     return {
       type: CartItemActionType.CREATED,
       data: cartItem,
-    }
+    };
   });
 };
 
-export const removeProductFromCart = async (id: number, userId: string): CartServiceResult => {
+export const removeProductFromCart = async (
+  id: number,
+  userId: string
+): CartServiceResult => {
   const cart = await selectCartAndItems(userId);
 
   const deleted = await CartItem.destroy({
     where: { id, cartId: cart.id },
   });
-  
+
   if (deleted) {
     return {
       type: CartItemActionType.DELETED,
-      message: `Cart item ${id} removed successfully`
+      message: `Cart item ${id} removed successfully`,
     };
   } else {
     return {
@@ -132,7 +164,11 @@ export const removeProductFromCart = async (id: number, userId: string): CartSer
   }
 };
 
-export const updateCartItemQuantity = async (id: number, userId: string, quantity: number): CartServiceResult => {
+export const updateCartItemQuantity = async (
+  id: number,
+  userId: string,
+  quantity: number
+): CartServiceResult => {
   if (quantity <= 0) {
     // If the quantity is zero or negative, delete the cart item.
     return await removeProductFromCart(id, userId);
@@ -152,14 +188,14 @@ export const updateCartItemQuantity = async (id: number, userId: string, quantit
 
     return {
       type: CartItemActionType.UPDATED,
-      message: `Cart item ${id} quantity updated to ${quantity}`
+      message: `Cart item ${id} quantity updated to ${quantity}`,
     };
   }
 };
 
 export const calculateCartTotal = async (userId: string) => {
   const cart = await selectCartAndItems(userId);
-  const products = await fetchProductInfo(cart, userId);    
+  const products = await fetchProductInfo(cart, userId);
   const total = products.reduce((accum, cartItem) => {
     const quantity = cartItem.quantity ?? 1;
     const price = cartItem.product.price;
@@ -171,7 +207,7 @@ export const calculateCartTotal = async (userId: string) => {
   return {
     type: CartItemActionType.SUCCESS,
     data: total,
-  }
+  };
 };
 
 export const checkoutCart = async (orderInfo: OrderInfo) => {
@@ -185,10 +221,12 @@ export const checkoutCart = async (orderInfo: OrderInfo) => {
       userId,
       status: CartStatus.ACTIVE,
     },
-    include: [{
-      model: CartItem,
-      as: 'items',
-    }]
+    include: [
+      {
+        model: CartItem,
+        as: "items",
+      },
+    ],
   });
 
   if (!cart) {
@@ -204,8 +242,8 @@ export const checkoutCart = async (orderInfo: OrderInfo) => {
   cart.status = CartStatus.ORDERED;
   await cart.save();
   await createNewCart(userId);
-  await publishOrderMessage({...orderInfo, cartId: cart.id});
-  
+  await publishOrderMessage({ ...orderInfo, cartId: cart.id });
+
   return {
     type: CartItemActionType.CREATED,
     message: "Checkout successful",

@@ -3,7 +3,11 @@ import sequelize from "./models";
 import * as grpc from "@grpc/grpc-js";
 import * as protoLoader from "@grpc/proto-loader";
 import path from "path";
-import { get_product_rpc, get_products_rpc } from "./controllers";
+import {
+  get_product_rpc,
+  get_products_rpc,
+  get_products_stream,
+} from "./controllers";
 
 const PROTO_PATH = path.join(__dirname, "proto", "product.proto");
 const packageDefinition = protoLoader.loadSync(PROTO_PATH, {
@@ -48,6 +52,7 @@ const onShutdown = async () => {
     server.addService(productProto.ProductService.service, {
       GetProduct: get_product_rpc,
       GetProducts: get_products_rpc,
+      GetProductsStream: get_products_stream,
     });
 
     const bindAddress = "0.0.0.0:50052";
