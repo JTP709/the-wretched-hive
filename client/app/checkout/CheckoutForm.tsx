@@ -5,9 +5,11 @@ import { useRouter } from "next/navigation";
 
 interface CheckoutFormProps {
   total: string;
+  user: User;
 }
 
-export default function CheckoutForm({ total }: CheckoutFormProps) {
+export default function CheckoutForm({ total, user }: CheckoutFormProps) {
+  console.log({ user })
   const router = useRouter();
   const { mutateAsync: checkout, isPending } = useCheckout();
 
@@ -47,35 +49,35 @@ export default function CheckoutForm({ total }: CheckoutFormProps) {
     >
       <label className="flex flex-col mb-4">
         Name:
-        <input className="text-black" required type="text" name="name"></input>
+        <input className="text-black" required type="text" name="name" defaultValue={`${user.firstName} ${user.lastName}`}></input>
       </label>
       <label className="flex flex-col mb-4">
         Email:
-        <input className="text-black" required type="text" name="email"></input>
+        <input className="text-black" required type="text" name="email" defaultValue={user.email}></input>
       </label>
       <label className="flex flex-col mb-4">
         Street Address:
-        <input className="text-black" required type="text" name="streetAddress"></input>
+        <input className="text-black" required type="text" name="streetAddress" defaultValue={user.streetAddress}></input>
       </label>
       <label className="flex flex-col mb-4">
         Street Address Line Two {'(optional)'}:
-        <input className="text-black" type="text" name="streetAddressTwo"></input>
+        <input className="text-black" type="text" name="streetAddressTwo" defaultValue={user.streetAddressTwo}></input>
       </label>
       <label className="flex flex-col mb-4">
         City:
-        <input className="text-black" required type="text" name="city"></input>
+        <input className="text-black" required type="text" name="city" defaultValue={user.city}></input>
       </label>
       <label className="flex flex-col mb-4">
         Planet:
-        <input className="text-black" required type="text" name="planet"></input>
+        <input className="text-black" required type="text" name="planet" defaultValue={user.planet}></input>
       </label>
       <label className="flex flex-col mb-4">
         Postal Code:
-        <input className="text-black" required type="text" name="postalCode"></input>
+        <input className="text-black" required type="text" name="postalCode" defaultValue={user.postalCode}></input>
       </label>
       <label className="flex flex-col mb-4">
         Commlink Number:
-        <input className="text-black" required type="text" name="phone"></input>
+        <input className="text-black" required type="text" name="phone" defaultValue={""}></input>
       </label>
       <button 
         className="mt-4 border-neutral-500 border-2 p-2 cursor-pointer"

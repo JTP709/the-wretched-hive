@@ -1,8 +1,9 @@
 import CheckoutForm from "./CheckoutForm";
-import { getCartTotal } from "@/api/server";
+import { getCartTotal, getUser } from "@/api/server";
 
 export default async function Checkout() {
   const total = await getCartTotal();
+  const user = await getUser();
 
   return (
     <>
@@ -10,7 +11,7 @@ export default async function Checkout() {
         <h1 className="font-bold text-xl mr-16">Checkout</h1>
         <p className="font-bold text-xl">Total: ${ total }</p>
       </div>
-      <CheckoutForm total={total} />
+      <CheckoutForm total={total} user={user} />
     </>
   )
 };

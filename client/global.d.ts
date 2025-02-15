@@ -16,14 +16,22 @@ interface CartItem extends Product {
 }
 
 type GetCartResponse = {
-  id: number,
-  productId: number,
-  quantity: number,
-}
+  id: number;
+  productId: number;
+  quantity: number;
+};
 
 type User = {
   username: string;
-}
+  firstName: string;
+  lastName: string;
+  email: string;
+  streetAddress: string;
+  streetAddressTwo: string;
+  city: string;
+  planet: string;
+  postalCode: string;
+};
 
 interface SignUpFormRequest {
   username: string;
@@ -40,4 +48,4 @@ interface SignUpFormRequest {
 
 interface SignUpForm extends SignUpFormRequest {
   passwordVerify: string;
-};
+}
