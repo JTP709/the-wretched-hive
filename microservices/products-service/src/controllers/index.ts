@@ -65,7 +65,6 @@ export const get_products_stream = async (
 ) => {
   const productIds: Array<string> = [];
   call.on("data", async ({ productId }: { productId: string }) => {
-    console.log({ productId });
     productIds.push(productId);
   });
 

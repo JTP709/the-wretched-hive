@@ -4,19 +4,21 @@ import { serverFetch } from "../utils/apiFetch";
 
 export const getCartTotal = async () => {
   const incomingHeaders = headers();
-  const cookie = (await incomingHeaders).get('cookie') || '';
-  const totalResponse = await serverFetch('http://localhost:4000/api/cart/total', {
-    headers: new Headers({ cookie }),
-    credentials: 'include',
-  });
-  
+  const cookie = (await incomingHeaders).get("cookie") || "";
+  const totalResponse = await serverFetch(
+    "http://localhost:4000/api/cart/total",
+    {
+      headers: new Headers({ cookie }),
+      credentials: "include",
+    }
+  );
+
   if (totalResponse.status === 403) {
-    redirect('/login');
+    redirect("/login");
   }
 
   if (!totalResponse.ok) {
-    console.log('getCartTotal Error', totalResponse);
-    redirect('/error');
+    redirect("/error");
   }
 
   const data = await totalResponse.json();
@@ -26,19 +28,18 @@ export const getCartTotal = async () => {
 
 export const getCartItems = async () => {
   const incomingHeaders = headers();
-  const cookie = (await incomingHeaders).get('cookie') || '';
-  const cartResponse = await serverFetch('http://localhost:4000/api/cart', {
+  const cookie = (await incomingHeaders).get("cookie") || "";
+  const cartResponse = await serverFetch("http://localhost:4000/api/cart", {
     headers: new Headers({ cookie }),
-    credentials: 'include',
+    credentials: "include",
   });
-  
+
   if (cartResponse.status === 403) {
-    redirect('/login');
+    redirect("/login");
   }
 
   if (!cartResponse.ok) {
-    console.log('getCartItems Error', cartResponse);
-    redirect('/error');
+    redirect("/error");
   }
 
   const cart = await cartResponse.json();
